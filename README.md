@@ -9,6 +9,7 @@ shortcut that can mint a badge, move escrowed funds, or override reputation.
 
 Live dashboard: <https://hoveiser.github.io/sybil-shield/>
 Demo video: <https://hoveiser.github.io/sybil-shield/demo-video-subtitled.mp4>
+Demo video in repo: [docs/demo-video-subtitled.mp4](docs/demo-video-subtitled.mp4)
 Contract source: [`contracts/sybil_shield.py`](contracts/sybil_shield.py)
 Transaction evidence: [`docs/evidence.md`](docs/evidence.md)
 
@@ -226,6 +227,7 @@ scripts/build_frontend_snapshot.py   Evidence -> frontend fallback snapshot
 frontend/                            React + TypeScript + Vite + Tailwind dashboard
 proofs/                              Public proof pages used by the live validators
 docs/evidence.md                     Generated transaction level evidence
+docs/demo-video-subtitled.mp4        48s subtitled demo video (also in frontend/public)
 evidence/studionet_deployment.json   Machine readable evidence
 tools/generate_logo.py               512x512 logo generator
 tools/generate_soundtrack.py         48s synthesized soundtrack
@@ -331,11 +333,15 @@ the data as cached.
 
 `docs/demo-video-subtitled.mp4` is a 48 second, 1280x720, H.264/AAC video with a
 synthesized ambient electronic soundtrack and burned-in English subtitles. It is
-gitignored on `main` because binaries do not belong in source control, and it is
-published from the `gh-pages` branch next to the dashboard build, so the viewer
-opens at <https://hoveiser.github.io/sybil-shield/demo-video-subtitled.mp4>
-(2,595,776 bytes, served with HTTP 200). The evidence panel on the dashboard
-links to it. Regenerate it with:
+tracked in the repository (2,595,776 bytes, sha256
+`0924187587acb243bb594eca524421f3c0415eea608efe6164ca0188f90ceedc`) and it is
+also copied to `frontend/public/` so the same file ships with the dashboard at
+<https://hoveiser.github.io/sybil-shield/demo-video-subtitled.mp4>. The evidence
+panel on the dashboard links to it. `.gitignore` keeps other recordings ignored
+(`*.mp4`, `*.webm`, `*.wav`) with an explicit whitelist for these two paths, and
+`.gitattributes` marks `*.mp4 binary` so Git never rewrites the bytes.
+
+Regenerate it with:
 
 ```bash
 .venv/bin/python tools/generate_soundtrack.py
