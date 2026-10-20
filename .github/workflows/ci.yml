@@ -25,9 +25,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/gltest-direct
-          key: gltest-direct-v0.3.0-rc7
+          key: gltest-direct-v0.2.16
       - name: Pre-download pinned GenVM runner
-        run: python -c "from gltest.direct.sdk_loader import download_artifacts; download_artifacts('v0.3.0-rc7')"
+        run: python -c "from gltest.direct.sdk_loader import download_artifacts; download_artifacts('v0.2.16')"
       - name: Lint contract
         run: genvm-lint check contracts/sybil_shield.py
       - name: Direct test suite
