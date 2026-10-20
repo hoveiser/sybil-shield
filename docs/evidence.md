@@ -5,11 +5,11 @@ through the GenLayer consensus data contract. Nothing in this file is
 copied from CLI output.
 
 - Network: studionet (chain ID 61999)
-- Contract: `0x94806406B257529934aCF29CA2E2D8e9C0D219Ba`
-- Deploy transaction: `0xd617468a7e85a220e6ae7a6250ad6600dde7b4adbe1a96debd1cdb953ea5923e`
+- Contract: `0xd37a39a3260aD2055a09CF89f3ecf71972695b8d`
+- Deploy transaction: `0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7`
 - Source sha256: `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e`
 - Four way source match: `True`
-- Finished at: 2026-10-20T11:23:23+00:00
+- Finished at: 2026-10-20T11:39:54+00:00
 
 ## Source identity
 
@@ -33,23 +33,25 @@ copied from CLI output.
 
 | Step | Tx | Status | Execution | Consensus |
 | --- | --- | --- | --- | --- |
-| deploy | `0xd617468a7e85a220e6ae7a6250ad6600dde7b4adbe1a96debd1cdb953ea5923e` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_alpha | `0xc1a34ffb325c8db873cd90e800613c25d995954ec82b94a218662b46cf47f7ff` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_beta | `0x882c4b345067d31c6b2a71978c9f07d2a9746e26468b2ca51f5d61fe9989a781` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_gamma | `0xa14c608b7e06f82fa533d2be5e2f5d78666452ee92c0155ec7dc56cd8d09b892` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_challenger | `0xf9ee7b3bc31a253bde7765422a2e25b6cc8af524bc18d87864dd685dcdce5a73` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| register_alpha | `0x637deed4363f869fa2063cc4ac35c51840753bd533398ba6289b4a8049013389` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| register_beta | `0xe0a7a39755d2babd07db4393094f05118ff776c6a68c7974bfa689d40fa76af2` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| register_gamma | `0x0235c97bf4fee8e8d3b094f83927dfbdfff118e428fcce8d9148e5ec3ead8b88` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| vouch_gamma_to_alpha | `0x80f54f4226ad29cf004f09312e7a672468558ea3e520ef8a3176291ae669c614` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| vouch_alpha_to_beta | `0x4327533417adea419a46e4234c2103282ab5500b87eb6e9b3198526b276831c5` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| verify_alpha_diamond | `0xfdc2118a548af399d5ca25b570dac42306a5045b64f3a12262fcac99dcd0e9a1` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| verify_beta_missing_fingerprint | `0x6821d753678f74b2facc8252a632fd3517555e5c559d65444bd419ed8ab9e14f` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| claim_alpha_reward_and_stake | `0x9f265f7e213f84aaa74ea1ee46ced4445e63c120a04edc1a3d1306854fcdef13` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| challenge_beta | `0x0e1c8b7b577c52c0ac74b9a6d53576621c09abf3772622c5edc73c67c3c7c87a` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| self_vouch_revert | `0xb08e41b48824d3a0ec7b8fd4bf3650e16fa6bddc3fc8b9e35f44b60b892e5837` | FINALIZED | ERROR | MAJORITY_AGREE |
-| duplicate_fingerprint_revert | `0xa0ebbcb88b65a39119f0a9fe0abf1d6df02e52fc5d1050a83e81fe9ef709d2b8` | FINALIZED | ERROR | MAJORITY_AGREE |
-| premature_stake_exit_revert | `0xf0f1d06adc0bb47b03c0fcf52b6338730c2a59cf9386a413dae687ae714edf31` | FINALIZED | ERROR | MAJORITY_AGREE |
+| deploy | `0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_alpha | `0x540d4c97f7d78d084bf7039c58695585e5b0a3b9dd9342d302df66eeda7960b0` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_beta | `0x6e4ca113658a5f7e817d70e87ccc387fd29dc0aba48d5e5383485550356365ce` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_gamma | `0xb1765fdc179f930d9ee5caefe7fdc64ef0af36896364416dec92f00b832eb37e` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_challenger | `0x6f711500cbb197997e5b295709f310b1d6954ecf5e0afd4bb6ea7edf815e6ad5` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| register_alpha | `0xe7b8dc69427a023fd6d2f2906c67cd2e4d580ab68c4d74b2d8145a5eec3e4740` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| register_beta | `0xa28141c940d7d3de8e3a0f1a2b21686e675441a888732260373a32f30e002be3` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| register_gamma | `0x15b9bf2c31dcab40200a6d807632ea540db4347e261d9ff6b2a060d3f3ee6d2c` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| vouch_beta_to_alpha | `0x7e076a3592edaf21bfaaa7ab982b9e53a2f8a8c02eb896ff7ba504680d700000` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| vouch_gamma_to_alpha | `0x014b48db68e2c58d70788a65333786ed36a676e4b0416257294a7f992f97a155` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| vouch_alpha_to_beta | `0xab19c0a5ac405723455e28dcb05ff7d136bab1be64c02f65e7fdf50bba8b3d59` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| verify_alpha_diamond | `0x38e0373b25c4c9fe8efdb3cf31dfda13c1da565b6c1201e6c7797de67fb180ed` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| verify_beta_missing_fingerprint | `0x95c3ec07267200fe50a94af84a2284fa07a7c85bd293e10fe6ed4e4afe6c0c9d` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| verify_gamma_fabricated_evidence | `0xb94a50cca0772e54a456ed77359962144037593e024ee59964143b0a053bcb0b` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| claim_alpha_reward_and_stake | `0x19ae906983ac653ad3158a15e52dc738bc8933b3cb0bed9d946c940310220ca9` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| challenge_beta | `0x8b1fd803e51bf4c91421cb3ab97da6874d3106b3c843b18be5b685d83726e09d` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| self_vouch_revert | `0xf617c52bc960e3f9951cdf4f1d2a51093c6e0e031075e57040c34f349bd42dff` | FINALIZED | ERROR | MAJORITY_AGREE |
+| duplicate_fingerprint_revert | `0x37e083e6083bc611e73464f6a3a6718c5ba1ddaad07f0e2c84fb96f40737f43d` | FINALIZED | ERROR | MAJORITY_AGREE |
+| premature_stake_exit_revert | `0x0cd1a089eada37b188294d70037816db84256dfdb2c4fb02badf4af6a49c5cc0` | FINALIZED | ERROR | MAJORITY_AGREE |
 
 ## Consensus outcomes
 
@@ -63,9 +65,9 @@ copied from CLI output.
 
 | Probe | Tx | Execution | Expected revert | Verified |
 | --- | --- | --- | --- | --- |
-| self_vouch_revert | `0xb08e41b48824d3a0ec7b8fd4bf3650e16fa6bddc3fc8b9e35f44b60b892e5837` | ERROR | self vouch is not allowed | True |
-| duplicate_fingerprint_revert | `0xa0ebbcb88b65a39119f0a9fe0abf1d6df02e52fc5d1050a83e81fe9ef709d2b8` | ERROR | duplicate identity fingerprint | True |
-| premature_stake_exit_revert | `0xf0f1d06adc0bb47b03c0fcf52b6338730c2a59cf9386a413dae687ae714edf31` | ERROR | open sybil challenge pending | True |
+| self_vouch_revert | `0xf617c52bc960e3f9951cdf4f1d2a51093c6e0e031075e57040c34f349bd42dff` | ERROR | self vouch is not allowed | True |
+| duplicate_fingerprint_revert | `0x37e083e6083bc611e73464f6a3a6718c5ba1ddaad07f0e2c84fb96f40737f43d` | ERROR | duplicate identity fingerprint | True |
+| premature_stake_exit_revert | `0x0cd1a089eada37b188294d70037816db84256dfdb2c4fb02badf4af6a49c5cc0` | ERROR | open sybil challenge pending | True |
 
 ## Final vault accounting
 

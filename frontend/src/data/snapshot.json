@@ -1,10 +1,10 @@
 {
   "network": "studionet",
   "chainId": 61999,
-  "address": "0x94806406B257529934aCF29CA2E2D8e9C0D219Ba",
-  "deployTx": "0xd617468a7e85a220e6ae7a6250ad6600dde7b4adbe1a96debd1cdb953ea5923e",
+  "address": "0xd37a39a3260aD2055a09CF89f3ecf71972695b8d",
+  "deployTx": "0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7",
   "sourceSha256": "38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e",
-  "finishedAt": "2026-10-20T11:23:23+00:00",
+  "finishedAt": "2026-10-20T11:39:54+00:00",
   "explorer": "https://genlayer-explorer.vercel.app",
   "config": {
     "token_symbol": "SST",
@@ -81,7 +81,7 @@
       "anchor": 100,
       "fingerprint_matched": true,
       "status": "ACTIVE",
-      "note": "Evidence page explicitly binds handle nadia_koval to fingerprint sha256:9f2c41d8be77a0c5e3d1a6b49f0c8e27d5a4b163. No fraud signals detected. Fingerprint matches claimed identity exactly."
+      "note": "Page clearly belongs to handle, binds fingerprint, no fraud signal, pre-checks passed."
     },
     {
       "passport": "beta",
@@ -103,21 +103,21 @@
   "guards": [
     {
       "step": "self_vouch_revert",
-      "tx_hash": "0xb08e41b48824d3a0ec7b8fd4bf3650e16fa6bddc3fc8b9e35f44b60b892e5837",
+      "tx_hash": "0xf617c52bc960e3f9951cdf4f1d2a51093c6e0e031075e57040c34f349bd42dff",
       "execution_result": "ERROR",
       "expected_reason": "self vouch is not allowed",
       "verified": true
     },
     {
       "step": "duplicate_fingerprint_revert",
-      "tx_hash": "0xa0ebbcb88b65a39119f0a9fe0abf1d6df02e52fc5d1050a83e81fe9ef709d2b8",
+      "tx_hash": "0x37e083e6083bc611e73464f6a3a6718c5ba1ddaad07f0e2c84fb96f40737f43d",
       "execution_result": "ERROR",
       "expected_reason": "duplicate identity fingerprint",
       "verified": true
     },
     {
       "step": "premature_stake_exit_revert",
-      "tx_hash": "0xf0f1d06adc0bb47b03c0fcf52b6338730c2a59cf9386a413dae687ae714edf31",
+      "tx_hash": "0x0cd1a089eada37b188294d70037816db84256dfdb2c4fb02badf4af6a49c5cc0",
       "execution_result": "ERROR",
       "expected_reason": "open sybil challenge pending",
       "verified": true
@@ -157,7 +157,7 @@
       "sybil_resistant": true,
       "trust_band": "DIAMOND_HUMAN",
       "trust_score": 100,
-      "verification_note": "Evidence page explicitly binds handle nadia_koval to fingerprint sha256:9f2c41d8be77a0c5e3d1a6b49f0c8e27d5a4b163. No fraud signals detected. Fingerprint matches claimed identity exactly.",
+      "verification_note": "Page clearly belongs to handle, binds fingerprint, no fraud signal, pre-checks passed.",
       "verification_rounds": 1,
       "vouch_total": "25000000000000000000",
       "voucher_registry": "0x8d3f5ed0021881b3f6b1779ea74bd9ae45e4a2bd=10000000000000000000;0x4832eccfb2bc3eb738bb823959b24a476b138e7d=15000000000000000000"
@@ -230,194 +230,216 @@
   "transactions": [
     {
       "step": "deploy",
-      "tx_hash": "0xd617468a7e85a220e6ae7a6250ad6600dde7b4adbe1a96debd1cdb953ea5923e",
+      "tx_hash": "0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xd617468a7e85a220e6ae7a6250ad6600dde7b4adbe1a96debd1cdb953ea5923e"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7"
     },
     {
       "step": "faucet_alpha",
-      "tx_hash": "0xc1a34ffb325c8db873cd90e800613c25d995954ec82b94a218662b46cf47f7ff",
+      "tx_hash": "0x540d4c97f7d78d084bf7039c58695585e5b0a3b9dd9342d302df66eeda7960b0",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xc1a34ffb325c8db873cd90e800613c25d995954ec82b94a218662b46cf47f7ff"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x540d4c97f7d78d084bf7039c58695585e5b0a3b9dd9342d302df66eeda7960b0"
     },
     {
       "step": "faucet_beta",
-      "tx_hash": "0x882c4b345067d31c6b2a71978c9f07d2a9746e26468b2ca51f5d61fe9989a781",
+      "tx_hash": "0x6e4ca113658a5f7e817d70e87ccc387fd29dc0aba48d5e5383485550356365ce",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x882c4b345067d31c6b2a71978c9f07d2a9746e26468b2ca51f5d61fe9989a781"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x6e4ca113658a5f7e817d70e87ccc387fd29dc0aba48d5e5383485550356365ce"
     },
     {
       "step": "faucet_gamma",
-      "tx_hash": "0xa14c608b7e06f82fa533d2be5e2f5d78666452ee92c0155ec7dc56cd8d09b892",
+      "tx_hash": "0xb1765fdc179f930d9ee5caefe7fdc64ef0af36896364416dec92f00b832eb37e",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xa14c608b7e06f82fa533d2be5e2f5d78666452ee92c0155ec7dc56cd8d09b892"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xb1765fdc179f930d9ee5caefe7fdc64ef0af36896364416dec92f00b832eb37e"
     },
     {
       "step": "faucet_challenger",
-      "tx_hash": "0xf9ee7b3bc31a253bde7765422a2e25b6cc8af524bc18d87864dd685dcdce5a73",
+      "tx_hash": "0x6f711500cbb197997e5b295709f310b1d6954ecf5e0afd4bb6ea7edf815e6ad5",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xf9ee7b3bc31a253bde7765422a2e25b6cc8af524bc18d87864dd685dcdce5a73"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x6f711500cbb197997e5b295709f310b1d6954ecf5e0afd4bb6ea7edf815e6ad5"
     },
     {
       "step": "register_alpha",
-      "tx_hash": "0x637deed4363f869fa2063cc4ac35c51840753bd533398ba6289b4a8049013389",
+      "tx_hash": "0xe7b8dc69427a023fd6d2f2906c67cd2e4d580ab68c4d74b2d8145a5eec3e4740",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x637deed4363f869fa2063cc4ac35c51840753bd533398ba6289b4a8049013389"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xe7b8dc69427a023fd6d2f2906c67cd2e4d580ab68c4d74b2d8145a5eec3e4740"
     },
     {
       "step": "register_beta",
-      "tx_hash": "0xe0a7a39755d2babd07db4393094f05118ff776c6a68c7974bfa689d40fa76af2",
+      "tx_hash": "0xa28141c940d7d3de8e3a0f1a2b21686e675441a888732260373a32f30e002be3",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xe0a7a39755d2babd07db4393094f05118ff776c6a68c7974bfa689d40fa76af2"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xa28141c940d7d3de8e3a0f1a2b21686e675441a888732260373a32f30e002be3"
     },
     {
       "step": "register_gamma",
-      "tx_hash": "0x0235c97bf4fee8e8d3b094f83927dfbdfff118e428fcce8d9148e5ec3ead8b88",
+      "tx_hash": "0x15b9bf2c31dcab40200a6d807632ea540db4347e261d9ff6b2a060d3f3ee6d2c",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x0235c97bf4fee8e8d3b094f83927dfbdfff118e428fcce8d9148e5ec3ead8b88"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x15b9bf2c31dcab40200a6d807632ea540db4347e261d9ff6b2a060d3f3ee6d2c"
+    },
+    {
+      "step": "vouch_beta_to_alpha",
+      "tx_hash": "0x7e076a3592edaf21bfaaa7ab982b9e53a2f8a8c02eb896ff7ba504680d700000",
+      "status": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "consensus_result": "MAJORITY_AGREE",
+      "leader_execution": "SUCCESS",
+      "expected": "SUCCESS",
+      "contract_address": null,
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x7e076a3592edaf21bfaaa7ab982b9e53a2f8a8c02eb896ff7ba504680d700000"
     },
     {
       "step": "vouch_gamma_to_alpha",
-      "tx_hash": "0x80f54f4226ad29cf004f09312e7a672468558ea3e520ef8a3176291ae669c614",
+      "tx_hash": "0x014b48db68e2c58d70788a65333786ed36a676e4b0416257294a7f992f97a155",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x80f54f4226ad29cf004f09312e7a672468558ea3e520ef8a3176291ae669c614"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x014b48db68e2c58d70788a65333786ed36a676e4b0416257294a7f992f97a155"
     },
     {
       "step": "vouch_alpha_to_beta",
-      "tx_hash": "0x4327533417adea419a46e4234c2103282ab5500b87eb6e9b3198526b276831c5",
+      "tx_hash": "0xab19c0a5ac405723455e28dcb05ff7d136bab1be64c02f65e7fdf50bba8b3d59",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x4327533417adea419a46e4234c2103282ab5500b87eb6e9b3198526b276831c5"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xab19c0a5ac405723455e28dcb05ff7d136bab1be64c02f65e7fdf50bba8b3d59"
     },
     {
       "step": "verify_alpha_diamond",
-      "tx_hash": "0xfdc2118a548af399d5ca25b570dac42306a5045b64f3a12262fcac99dcd0e9a1",
+      "tx_hash": "0x38e0373b25c4c9fe8efdb3cf31dfda13c1da565b6c1201e6c7797de67fb180ed",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xfdc2118a548af399d5ca25b570dac42306a5045b64f3a12262fcac99dcd0e9a1"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x38e0373b25c4c9fe8efdb3cf31dfda13c1da565b6c1201e6c7797de67fb180ed"
     },
     {
       "step": "verify_beta_missing_fingerprint",
-      "tx_hash": "0x6821d753678f74b2facc8252a632fd3517555e5c559d65444bd419ed8ab9e14f",
+      "tx_hash": "0x95c3ec07267200fe50a94af84a2284fa07a7c85bd293e10fe6ed4e4afe6c0c9d",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x6821d753678f74b2facc8252a632fd3517555e5c559d65444bd419ed8ab9e14f"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x95c3ec07267200fe50a94af84a2284fa07a7c85bd293e10fe6ed4e4afe6c0c9d"
+    },
+    {
+      "step": "verify_gamma_fabricated_evidence",
+      "tx_hash": "0xb94a50cca0772e54a456ed77359962144037593e024ee59964143b0a053bcb0b",
+      "status": "FINALIZED",
+      "execution_result": "SUCCESS",
+      "consensus_result": "MAJORITY_AGREE",
+      "leader_execution": "SUCCESS",
+      "expected": "SUCCESS",
+      "contract_address": null,
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xb94a50cca0772e54a456ed77359962144037593e024ee59964143b0a053bcb0b"
     },
     {
       "step": "claim_alpha_reward_and_stake",
-      "tx_hash": "0x9f265f7e213f84aaa74ea1ee46ced4445e63c120a04edc1a3d1306854fcdef13",
+      "tx_hash": "0x19ae906983ac653ad3158a15e52dc738bc8933b3cb0bed9d946c940310220ca9",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x9f265f7e213f84aaa74ea1ee46ced4445e63c120a04edc1a3d1306854fcdef13"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x19ae906983ac653ad3158a15e52dc738bc8933b3cb0bed9d946c940310220ca9"
     },
     {
       "step": "challenge_beta",
-      "tx_hash": "0x0e1c8b7b577c52c0ac74b9a6d53576621c09abf3772622c5edc73c67c3c7c87a",
+      "tx_hash": "0x8b1fd803e51bf4c91421cb3ab97da6874d3106b3c843b18be5b685d83726e09d",
       "status": "FINALIZED",
       "execution_result": "SUCCESS",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "SUCCESS",
       "expected": "SUCCESS",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x0e1c8b7b577c52c0ac74b9a6d53576621c09abf3772622c5edc73c67c3c7c87a"
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x8b1fd803e51bf4c91421cb3ab97da6874d3106b3c843b18be5b685d83726e09d"
     },
     {
       "step": "self_vouch_revert",
-      "tx_hash": "0xb08e41b48824d3a0ec7b8fd4bf3650e16fa6bddc3fc8b9e35f44b60b892e5837",
+      "tx_hash": "0xf617c52bc960e3f9951cdf4f1d2a51093c6e0e031075e57040c34f349bd42dff",
       "status": "FINALIZED",
       "execution_result": "ERROR",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "ERROR",
       "expected": "ROLLBACK",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xb08e41b48824d3a0ec7b8fd4bf3650e16fa6bddc3fc8b9e35f44b60b892e5837",
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xf617c52bc960e3f9951cdf4f1d2a51093c6e0e031075e57040c34f349bd42dff",
       "expected_reason": "self vouch is not allowed",
       "verified": true
     },
     {
       "step": "duplicate_fingerprint_revert",
-      "tx_hash": "0xa0ebbcb88b65a39119f0a9fe0abf1d6df02e52fc5d1050a83e81fe9ef709d2b8",
+      "tx_hash": "0x37e083e6083bc611e73464f6a3a6718c5ba1ddaad07f0e2c84fb96f40737f43d",
       "status": "FINALIZED",
       "execution_result": "ERROR",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "ERROR",
       "expected": "ROLLBACK",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xa0ebbcb88b65a39119f0a9fe0abf1d6df02e52fc5d1050a83e81fe9ef709d2b8",
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x37e083e6083bc611e73464f6a3a6718c5ba1ddaad07f0e2c84fb96f40737f43d",
       "expected_reason": "duplicate identity fingerprint",
       "verified": true
     },
     {
       "step": "premature_stake_exit_revert",
-      "tx_hash": "0xf0f1d06adc0bb47b03c0fcf52b6338730c2a59cf9386a413dae687ae714edf31",
+      "tx_hash": "0x0cd1a089eada37b188294d70037816db84256dfdb2c4fb02badf4af6a49c5cc0",
       "status": "FINALIZED",
       "execution_result": "ERROR",
       "consensus_result": "MAJORITY_AGREE",
       "leader_execution": "ERROR",
       "expected": "ROLLBACK",
       "contract_address": null,
-      "explorer": "https://genlayer-explorer.vercel.app/transactions/0xf0f1d06adc0bb47b03c0fcf52b6338730c2a59cf9386a413dae687ae714edf31",
+      "explorer": "https://genlayer-explorer.vercel.app/transactions/0x0cd1a089eada37b188294d70037816db84256dfdb2c4fb02badf4af6a49c5cc0",
       "expected_reason": "open sybil challenge pending",
       "verified": true
     }

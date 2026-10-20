@@ -18,11 +18,11 @@ Transaction evidence: [`docs/evidence.md`](docs/evidence.md)
 | Item | Value |
 | --- | --- |
 | Network | GenLayer studionet, chain ID `61999` |
-| Contract | [`0x2b7162AdC6F112dC03A746Ead039e44059639A04`](https://genlayer-explorer.vercel.app/contracts/0x2b7162AdC6F112dC03A746Ead039e44059639A04) |
-| Deploy transaction | `0x2df2d6775fd48e928782edc19811ee70f7643ee64ceee39beb8a22ce6978f7ec` |
-| Contract source sha256 | `e156f1a0f875bd82c39c376dfbc023ce10b8a2501f96b9be82fad5f2b073bbf2` |
+| Contract | [`0xd37a39a3260aD2055a09CF89f3ecf71972695b8d`](https://genlayer-explorer.vercel.app/contracts/0xd37a39a3260aD2055a09CF89f3ecf71972695b8d) |
+| Deploy transaction | `0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7` |
+| Contract source sha256 | `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e` |
 | Four-way source identity | `4 / 4` sources match (repo file, git HEAD blob, deploy calldata, on-chain code) |
-| Finalized transactions | `18`, all `FINALIZED` with `MAJORITY_AGREE` |
+| Finalized transactions | `19`, all `FINALIZED` with `MAJORITY_AGREE` |
 | Guard rollbacks | `3 / 3`, all `FINISHED_WITH_ERROR` as expected |
 | Vault invariant | `check_vault_invariants().ok = true` |
 

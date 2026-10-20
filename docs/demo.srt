@@ -40,7 +40,7 @@ Rewards are paid only from slashed fraud, never minted per verification.
 
 11
 00:00:40,000 --> 00:00:44,000
-Live on studionet: 18 finalized transactions and 3 guard rollbacks.
+Live on studionet: 19 finalized transactions and 3 guard rollbacks.
 
 12
 00:00:44,000 --> 00:00:48,000

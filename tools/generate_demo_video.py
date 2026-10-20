@@ -393,7 +393,7 @@ def draw_scene_6(layer, d, u, t):
         text(d, (x + 660, row_y), consensus, font(MONO, 10), MIST)
 
     cards = [
-        ("18", "finalized transactions", LIME),
+        ("19", "finalized transactions", LIME),
         ("3 / 3", "guard rollbacks", AMBER),
         ("4 / 4", "sha256 sources", CYAN),
     ]
@@ -403,10 +403,10 @@ def draw_scene_6(layer, d, u, t):
         text(d, (892, y + 14), value, font(BOLD, 28), color)
         text(d, (892, y + 50), label, font(REGULAR, 12), MIST)
 
-    text(d, (66, 516), "0x2b7162AdC6F112dC03A746Ead039e44059639A04", font(MONO, 12), WHITE)
+    text(d, (66, 516), "0xd37a39a3260aD2055a09CF89f3ecf71972695b8d", font(MONO, 12), WHITE)
     text(d, (66, 540), "github.com/hoveiser/sybil-shield", font(MONO, 12), CYAN)
     text(d, (66, 562), "hoveiser.github.io/sybil-shield", font(MONO, 12), CYAN)
-    text(d, (66, 592), "source sha256 e156f1a0f875bd82c39c376dfbc023ce10b8a2501f96b9be82fad5f2b073bbf2", font(MONO, 8), MIST)
+    text(d, (66, 592), "source sha256 38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e", font(MONO, 8), MIST)
 
 
 SCENE_DRAWERS = [draw_scene_1, draw_scene_2, draw_scene_3, draw_scene_4, draw_scene_5, draw_scene_6]
@@ -422,7 +422,7 @@ SUBTITLE_LINES = [
     (28.0, 32.0, "Anchor 0 slashes. 40 stays provisional. 75 verifies. 100 is Diamond."),
     (32.0, 36.0, "Every liability stays in vault custody until settlement is claimed."),
     (36.0, 40.0, "Rewards are paid only from slashed fraud, never minted per verification."),
-    (40.0, 44.0, "Live on studionet: 18 finalized transactions and 3 guard rollbacks."),
+    (40.0, 44.0, "Live on studionet: 19 finalized transactions and 3 guard rollbacks."),
     (44.0, 48.0, "Four way sha256 match. github.com/hoveiser/sybil-shield"),
 ]
 

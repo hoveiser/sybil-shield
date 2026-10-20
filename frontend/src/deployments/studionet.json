@@ -1,9 +1,9 @@
 {
   "network": "studionet",
   "chainId": 61999,
-  "address": "0x94806406B257529934aCF29CA2E2D8e9C0D219Ba",
-  "deployTx": "0xd617468a7e85a220e6ae7a6250ad6600dde7b4adbe1a96debd1cdb953ea5923e",
+  "address": "0xd37a39a3260aD2055a09CF89f3ecf71972695b8d",
+  "deployTx": "0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7",
   "sourceSha256": "38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e",
-  "deployedAt": "2026-10-20T11:23:23+00:00",
+  "deployedAt": "2026-10-20T11:39:54+00:00",
   "explorer": "https://genlayer-explorer.vercel.app"
 }
