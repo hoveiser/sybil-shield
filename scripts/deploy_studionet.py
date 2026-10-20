@@ -75,6 +75,39 @@ def log(message):
     print(message, flush=True)
 
 
+_LAST_REQUEST = [0.0]
+MIN_REQUEST_GAP = 2.6
+
+
+def throttle():
+    """Keep the script under the studionet limit of 30 requests per minute."""
+    now = time.monotonic()
+    wait = MIN_REQUEST_GAP - (now - _LAST_REQUEST[0])
+    if wait > 0:
+        time.sleep(wait)
+    _LAST_REQUEST[0] = time.monotonic()
+
+
+def is_rate_limit(error):
+    text = str(error).lower()
+    return "rate limit" in text or "too many requests" in text
+
+
+def send_with_retry(label, fn, attempts=4):
+    """A rate limited submission was rejected before broadcast, so retrying is safe."""
+    for attempt in range(attempts):
+        throttle()
+        try:
+            return fn()
+        except Exception as exc:  # noqa: BLE001 - only rate limits are retried
+            if is_rate_limit(exc) and attempt < attempts - 1:
+                delay = 22 * (attempt + 1)
+                log("  rate limited on %s, waiting %ds" % (label, delay))
+                time.sleep(delay)
+                continue
+            raise
+
+
 def sha256_bytes(payload):
     return hashlib.sha256(payload).hexdigest()
 
@@ -120,6 +153,7 @@ def tx_hash_hex(value):
 
 
 def read_view(client, address, function_name, args=None):
+    throttle()
     return with_retries(
         "read " + function_name,
         lambda: client.read_contract(address, function_name, args=args or []),
@@ -149,18 +183,21 @@ def summarize(receipt, step, expected, extra=None):
 
 def send_write(client, address, function_name, args, account, step, expected="SUCCESS"):
     log("  tx %s as %s" % (step, account.address))
-    tx = client.write_contract(address, function_name, account=account, args=args)
+    tx = send_with_retry(
+        step, lambda: client.write_contract(address, function_name, account=account, args=args)
+    )
+    log("    submitted %s" % tx_hash_hex(tx))
     receipt = with_retries(
         "receipt " + step,
         lambda: client.wait_for_transaction_receipt(
             tx,
             status=TransactionStatus.FINALIZED,
-            interval=4000,
-            retries=450,
+            interval=12000,
+            retries=150,
             full_transaction=True,
         ),
         attempts=3,
-        base_delay=4.0,
+        base_delay=15.0,
     )
     record = summarize(receipt, step, expected)
     log("    %s %s %s" % (record["tx_hash"], record["execution_result"], record["consensus_result"]))
@@ -177,6 +214,7 @@ def observed_matches(record, expected):
 
 
 def fund_native(client, sender, recipient, amount_wei):
+    throttle()
     latest = client.w3.eth.get_block("latest")
     base_fee = latest.get("baseFeePerGas") or client.w3.to_wei(1, "gwei")
     priority = client.w3.to_wei(2, "gwei")
@@ -289,7 +327,7 @@ def main():
         contract_address = checkpoint["contract_address"]
         deploy_tx = checkpoint.get("deploy_tx")
         log("reusing deployed contract %s" % contract_address)
-        receipt = with_retries("deploy readback", lambda: client.get_transaction(deploy_tx))
+        receipt = with_retries("deploy readback", lambda: (throttle(), client.get_transaction(deploy_tx))[1])
         deploy_record = summarize(receipt, "deploy", "SUCCESS")
         if not any(tx["step"] == "deploy" and tx["tx_hash"] == deploy_tx for tx in transactions):
             record_tx(deploy_record)
@@ -301,18 +339,20 @@ def main():
         persist()
     else:
         log("deploying contract")
-        tx = client.deploy_contract(source_bytes.decode("utf-8"), account=deployer)
+        tx = send_with_retry(
+            "deploy", lambda: client.deploy_contract(source_bytes.decode("utf-8"), account=deployer)
+        )
         receipt = with_retries(
             "deploy receipt",
             lambda: client.wait_for_transaction_receipt(
                 tx,
                 status=TransactionStatus.FINALIZED,
-                interval=5000,
-                retries=450,
+                interval=12000,
+                retries=150,
                 full_transaction=True,
             ),
             attempts=3,
-            base_delay=5.0,
+            base_delay=15.0,
         )
         decoded = receipt.get("tx_data_decoded") or {}
         contract_address = decoded.get("contract_address") or receipt.get("recipient")
@@ -575,7 +615,7 @@ def main():
     # Four way source identity.
     onchain_code = with_retries(
         "gen_getContractCode",
-        lambda: client.provider.make_request("gen_getContractCode", [contract_address]),
+        lambda: (throttle(), client.provider.make_request("gen_getContractCode", [contract_address]))[1],
     )["result"]
     if isinstance(onchain_code, dict):
         onchain_code = onchain_code.get("code") or onchain_code.get("result") or ""
