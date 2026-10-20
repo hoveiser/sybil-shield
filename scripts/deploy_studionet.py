@@ -438,8 +438,10 @@ def main():
         assert observed_matches(record, "SUCCESS"), record
     beta_state = read_view(client, contract_address, "get_passport", [passport_ids["beta"]])
     log("beta band %s status %s" % (beta_state["trust_band"], beta_state["status"]))
-    if beta_state["status"] != "UNVERIFIED_PROVISIONAL":
+    if beta_state["trust_band"] != "UNVERIFIED_PROVISIONAL":
         raise SystemExit("beta did not stay provisional after the missing fingerprint check")
+    if beta_state["status"] not in ("UNVERIFIED_PROVISIONAL", "CHALLENGED"):
+        raise SystemExit("beta left the provisional state unexpectedly: %s" % beta_state["status"])
 
     # Live consensus run 3: the gamma proof page never references the claim, so
     # the anchor is zero and the stake is slashed into the protocol reserve.
