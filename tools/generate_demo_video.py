@@ -6,6 +6,7 @@ the synthesized soundtrack and burned in English subtitles from docs/demo.srt.
 The output is docs/demo-video-subtitled.mp4 and is intentionally gitignored.
 """
 
+import json
 import math
 import shutil
 import subprocess
@@ -23,6 +24,25 @@ SUBTITLES = ROOT / "docs" / "demo.srt"
 SUBTITLES_ASS = ROOT / "docs" / "demo.ass"
 OUTPUT = ROOT / "docs" / "demo-video-subtitled.mp4"
 LOGO = ROOT / "docs" / "logo.png"
+EVIDENCE_FILE = ROOT / "evidence" / "studionet_deployment.json"
+
+
+def _load_evidence():
+    """Read the on chain record so the video can never quote a stale claim."""
+    try:
+        data = json.loads(EVIDENCE_FILE.read_text())
+    except (OSError, ValueError):
+        raise SystemExit("run scripts/deploy_studionet.py before rendering the demo video")
+    address = data["contract_address"]
+    source_sha = data["source_sha256"]
+    tx_count = len(data["transactions"])
+    guard_count = len(data["guard_rollbacks"])
+    if not data["source_identity"]["four_way_match"]:
+        raise SystemExit("refusing to render: the four way sha256 identity is incomplete")
+    return address, source_sha, tx_count, guard_count
+
+
+EVIDENCE_ADDRESS, EVIDENCE_SOURCE_SHA, EVIDENCE_TX_COUNT, EVIDENCE_GUARD_COUNT = _load_evidence()
 
 W, H = 1280, 720
 FPS = 30
@@ -393,8 +413,8 @@ def draw_scene_6(layer, d, u, t):
         text(d, (x + 660, row_y), consensus, font(MONO, 10), MIST)
 
     cards = [
-        ("19", "finalized transactions", LIME),
-        ("3 / 3", "guard rollbacks", AMBER),
+        (str(EVIDENCE_TX_COUNT), "finalized transactions", LIME),
+        ("%d / %d" % (EVIDENCE_GUARD_COUNT, EVIDENCE_GUARD_COUNT), "guard rollbacks", AMBER),
         ("4 / 4", "sha256 sources", CYAN),
     ]
     for index, (value, label, color) in enumerate(cards):
@@ -403,10 +423,10 @@ def draw_scene_6(layer, d, u, t):
         text(d, (892, y + 14), value, font(BOLD, 28), color)
         text(d, (892, y + 50), label, font(REGULAR, 12), MIST)
 
-    text(d, (66, 516), "0xd37a39a3260aD2055a09CF89f3ecf71972695b8d", font(MONO, 12), WHITE)
+    text(d, (66, 516), EVIDENCE_ADDRESS, font(MONO, 12), WHITE)
     text(d, (66, 540), "github.com/hoveiser/sybil-shield", font(MONO, 12), CYAN)
     text(d, (66, 562), "hoveiser.github.io/sybil-shield", font(MONO, 12), CYAN)
-    text(d, (66, 592), "source sha256 38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e", font(MONO, 8), MIST)
+    text(d, (66, 592), "source sha256 " + EVIDENCE_SOURCE_SHA, font(MONO, 8), MIST)
 
 
 SCENE_DRAWERS = [draw_scene_1, draw_scene_2, draw_scene_3, draw_scene_4, draw_scene_5, draw_scene_6]
@@ -422,7 +442,12 @@ SUBTITLE_LINES = [
     (28.0, 32.0, "Anchor 0 slashes. 40 stays provisional. 75 verifies. 100 is Diamond."),
     (32.0, 36.0, "Every liability stays in vault custody until settlement is claimed."),
     (36.0, 40.0, "Rewards are paid only from slashed fraud, never minted per verification."),
-    (40.0, 44.0, "Live on studionet: 19 finalized transactions and 3 guard rollbacks."),
+    (
+        40.0,
+        44.0,
+        "Live on studionet: %d finalized transactions and %d guard rollbacks."
+        % (EVIDENCE_TX_COUNT, EVIDENCE_GUARD_COUNT),
+    ),
     (44.0, 48.0, "Four way sha256 match. github.com/hoveiser/sybil-shield"),
 ]
 

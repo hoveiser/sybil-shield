@@ -18,18 +18,24 @@ Transaction evidence: [`docs/evidence.md`](docs/evidence.md)
 | Item | Value |
 | --- | --- |
 | Network | GenLayer studionet, chain ID `61999` |
-| Contract | [`0xd37a39a3260aD2055a09CF89f3ecf71972695b8d`](https://genlayer-explorer.vercel.app/contracts/0xd37a39a3260aD2055a09CF89f3ecf71972695b8d) |
-| Deploy transaction | `0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7` |
-| Deployed contract commit | `8a1bdf8c80fa0b4178597a11f8187be9a85fc716` |
-| Contract source sha256 | `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e` |
+| Contract | [`0xd85E634b0C16D6d79b0AD10406B791db2a1fdaCc`](https://genlayer-explorer.vercel.app/contracts/0xd85E634b0C16D6d79b0AD10406B791db2a1fdaCc) |
+| Deploy transaction | `0x45396573bbec2684867b9acf76de04477b773ccaf783226bf6b0c5645306314e` |
+| Deploy transaction created | `2026-10-20T13:59:55+00:00` (read back from the chain) |
+| Deployed contract commit | `9e7e02ba3f068b5f8f8a916544efdff6561148b7` |
+| Release tag | `studionet-v1`, whose contract blob is byte identical to `9e7e02b` |
+| Contract source sha256 | `99c4adf28f51c4dc9437754a313fb1a91a75431838ffbc2277fe7f48af31ac19` |
 | Four-way source identity | `4 / 4` sources match (repo file, git HEAD blob, deploy calldata, on-chain code) |
 | Finalized transactions | `19`, all `FINALIZED` with `MAJORITY_AGREE` |
-| Guard rollbacks | `3 / 3`, all `FINISHED_WITH_ERROR` as expected |
+| Guard rollbacks | `3 / 3`, each `FINALIZED` with leader execution result `ERROR` (reverted) |
 | Vault invariant | `check_vault_invariants().ok = true` |
 
 The four hashes are not cosmetic. The repository file, the committed git blob,
 the code payload inside the deploy transaction, and the code served by
 `gen_getContractCode` all produce the same sha256.
+
+The transaction table above is generated, not typed. `103` direct tests and
+`genvm-lint` pass on the same commit, and CI runs both on every push to `main`
+(`.github/workflows/ci.yml`).
 
 ### Live consensus outcomes
 
@@ -108,6 +114,30 @@ claim_verified_stake_or_bounty
   vault_custody_balance -> holder or challenger token balance
 ```
 
+### Status and permission matrix
+
+`who` is the caller that the guard accepts. Fund movements are always
+`vault_custody_balance` to a token balance, or the reverse. There is no owner
+role in this table.
+
+| Status | Write methods that succeed | Next status | What happens to funds |
+| --- | --- | --- | --- |
+| `PROVISIONAL` | `vouch_for_passport` (non holder), `challenge_sybil_passport` (non holder, non voucher), `update_proof_url` (holder), `verify_passport_credential_live` (anyone) | `ACTIVE`, `UNVERIFIED`, `CHALLENGED`, `SLASHED` | Stake locked in custody, nothing is released before a round |
+| `CHALLENGED` | `verify_passport_credential_live` (anyone) | `ACTIVE`, `UNVERIFIED`, `SLASHED` | Stake, vouches and the bond stay locked until the round settles |
+| `UNVERIFIED` | `withdraw_unlocked_stake` (holder), `reclaim_vouch` (voucher), `challenge_sybil_passport`, `update_proof_url` (holder), `verify_passport_credential_live` | `WITHDRAWN`, `CHALLENGED`, `ACTIVE`, `SLASHED` | Bond returned to the challenger as a claim, stake still locked until the holder exits |
+| `ACTIVE` | `claim_verified_stake_or_bounty` (holder), `vouch_for_passport`, `reclaim_vouch` (voucher) | terminal | Stake, false bond and reward leave custody through the claim |
+| `SLASHED` | `claim_verified_stake_or_bounty` (challenger) | terminal | Stake plus confiscated voucher stakes go to the challenger, or to the reserve when nobody challenged |
+| `WITHDRAWN` | `reclaim_vouch` (voucher) | terminal | Holder stake already returned, voucher stakes still reclaimable |
+
+Every status has at least one exit that moves funds out of custody, and no exit
+depends on a specific counterparty cooperating: verification is permissionless,
+so a challenged or stalled passport cannot be frozen by silence. The contract
+uses status transitions rather than wall clock deadlines, because a deadline an
+LLM validator can read is not deterministic across rotations. The only thing
+that can stall a round is consensus itself failing to finalize (for example a
+validator timeout), which is recorded as a failed transaction and can be retried
+by anyone.
+
 ### Trust bands
 
 | Anchor | Band | Meaning | Settlement |
@@ -163,8 +193,15 @@ Every counterparty is treated as adversarial.
   cannot be withdrawn, and cannot accept new vouches. A previous unresolved
   claim must be settled before a new challenge round starts.
 - **Unique identity.** The fingerprint index maps one identity to exactly one
-  passport. Self-vouching, self-challenging, and voucher-challenging revert
+  live passport. Self-vouching, self-challenging, and voucher-challenging revert
   before any token moves.
+- **No name burning.** A holder that exits after an inconclusive round releases
+  the handle and fingerprint index, so a sybil cannot register a victim handle,
+  take one provisional round, withdraw and quarantine the name forever. A
+  slashed identity stays quarantined.
+- **Confiscated vouches are retired.** When a passport is slashed, every voucher
+  record is marked inactive and the registry is cleared, so a confiscated stake
+  can never be reclaimed by its voucher and never double counts.
 - **Post-slash lockdown.** A slashed passport rejects vouches and voucher
   reclaims.
 - **Bounded vouches.** A passport accepts at most 12 staked vouchers, which
@@ -180,7 +217,7 @@ Every counterparty is treated as adversarial.
 
 ```text
 contracts/sybil_shield.py            Intelligent Contract (22 methods, 12 view, 10 write)
-tests/test_sybil_shield_direct.py    97 direct mode tests
+tests/test_sybil_shield_direct.py    103 direct mode tests
 tests/conftest.py                    Windows unlink/remove permission workaround
 scripts/deploy_studionet.py          Idempotent deploy, seed, live run and evidence writer
 scripts/build_frontend_snapshot.py   Evidence -> frontend fallback snapshot
@@ -219,7 +256,7 @@ python3 -m venv .venv
 .venv/bin/python -m pytest tests/ -q
 ```
 
-Expected: `genvm-lint` reports zero errors, and `97 passed` in direct mode.
+Expected: `genvm-lint` reports zero errors, and `103 passed` in direct mode.
 
 ### Studionet deployment
 
@@ -292,7 +329,7 @@ burned-in text is exactly 24px.
 
 ## Testing
 
-The direct suite runs the contract in the GenVM direct runner and covers 97
+The direct suite runs the contract in the GenVM direct runner and covers 103
 tests across:
 
 - SST ledger: faucet caps, transfers, conservation, insufficient balance.
@@ -306,6 +343,9 @@ tests across:
   thin pages, fabricated pages, conflicting bindings, string anchors.
 - Claims, false-challenger payouts, double claims, non-entitled callers.
 - Exit guards: open challenge, provisional withdrawal, post-slash lockdown.
+- Identity indexes: duplicate fingerprint and handle per domain, release after a
+  holder withdraws, permanent quarantine after a slash, retired voucher records
+  after a slash, and double reclaim.
 - Invariants, leaderboard ordering, activity feed, prompt preview.
 
 Direct mode runs the leader path only. Validator agreement is proven by the live

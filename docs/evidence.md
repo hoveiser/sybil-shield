@@ -5,20 +5,22 @@ through the GenLayer consensus data contract. Nothing in this file is
 copied from CLI output.
 
 - Network: studionet (chain ID 61999)
-- Contract: `0xd37a39a3260aD2055a09CF89f3ecf71972695b8d`
-- Deploy transaction: `0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7`
-- Source sha256: `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e`
+- Contract: `0xd85E634b0C16D6d79b0AD10406B791db2a1fdaCc`
+- Deploy transaction: `0x45396573bbec2684867b9acf76de04477b773ccaf783226bf6b0c5645306314e`
+- Deploy transaction created: 2026-10-20T13:59:55.936772+00:00
+- Deployed contract commit: `9e7e02ba3f068b5f8f8a916544efdff6561148b7`
+- Source sha256: `99c4adf28f51c4dc9437754a313fb1a91a75431838ffbc2277fe7f48af31ac19`
 - Four way source match: `True`
-- Finished at: 2026-10-20T11:39:54+00:00
+- Finished at: 2026-10-20T14:15:15+00:00
 
 ## Source identity
 
 | Source | sha256 | Matches repo file |
 | --- | --- | --- |
-| repo_file | `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e` | yes |
-| git_head_blob | `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e` | yes |
-| deploy_tx_code | `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e` | yes |
-| onchain_contract_code | `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e` | yes |
+| repo_file | `99c4adf28f51c4dc9437754a313fb1a91a75431838ffbc2277fe7f48af31ac19` | yes |
+| git_head_blob | `99c4adf28f51c4dc9437754a313fb1a91a75431838ffbc2277fe7f48af31ac19` | yes |
+| deploy_tx_code | `99c4adf28f51c4dc9437754a313fb1a91a75431838ffbc2277fe7f48af31ac19` | yes |
+| onchain_contract_code | `99c4adf28f51c4dc9437754a313fb1a91a75431838ffbc2277fe7f48af31ac19` | yes |
 
 ## Signers
 
@@ -33,25 +35,25 @@ copied from CLI output.
 
 | Step | Tx | Status | Execution | Consensus |
 | --- | --- | --- | --- | --- |
-| deploy | `0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_alpha | `0x540d4c97f7d78d084bf7039c58695585e5b0a3b9dd9342d302df66eeda7960b0` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_beta | `0x6e4ca113658a5f7e817d70e87ccc387fd29dc0aba48d5e5383485550356365ce` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_gamma | `0xb1765fdc179f930d9ee5caefe7fdc64ef0af36896364416dec92f00b832eb37e` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| faucet_challenger | `0x6f711500cbb197997e5b295709f310b1d6954ecf5e0afd4bb6ea7edf815e6ad5` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| register_alpha | `0xe7b8dc69427a023fd6d2f2906c67cd2e4d580ab68c4d74b2d8145a5eec3e4740` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| register_beta | `0xa28141c940d7d3de8e3a0f1a2b21686e675441a888732260373a32f30e002be3` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| register_gamma | `0x15b9bf2c31dcab40200a6d807632ea540db4347e261d9ff6b2a060d3f3ee6d2c` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| vouch_beta_to_alpha | `0x7e076a3592edaf21bfaaa7ab982b9e53a2f8a8c02eb896ff7ba504680d700000` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| vouch_gamma_to_alpha | `0x014b48db68e2c58d70788a65333786ed36a676e4b0416257294a7f992f97a155` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| vouch_alpha_to_beta | `0xab19c0a5ac405723455e28dcb05ff7d136bab1be64c02f65e7fdf50bba8b3d59` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| verify_alpha_diamond | `0x38e0373b25c4c9fe8efdb3cf31dfda13c1da565b6c1201e6c7797de67fb180ed` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| verify_beta_missing_fingerprint | `0x95c3ec07267200fe50a94af84a2284fa07a7c85bd293e10fe6ed4e4afe6c0c9d` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| verify_gamma_fabricated_evidence | `0xb94a50cca0772e54a456ed77359962144037593e024ee59964143b0a053bcb0b` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| claim_alpha_reward_and_stake | `0x19ae906983ac653ad3158a15e52dc738bc8933b3cb0bed9d946c940310220ca9` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| challenge_beta | `0x8b1fd803e51bf4c91421cb3ab97da6874d3106b3c843b18be5b685d83726e09d` | FINALIZED | SUCCESS | MAJORITY_AGREE |
-| self_vouch_revert | `0xf617c52bc960e3f9951cdf4f1d2a51093c6e0e031075e57040c34f349bd42dff` | FINALIZED | ERROR | MAJORITY_AGREE |
-| duplicate_fingerprint_revert | `0x37e083e6083bc611e73464f6a3a6718c5ba1ddaad07f0e2c84fb96f40737f43d` | FINALIZED | ERROR | MAJORITY_AGREE |
-| premature_stake_exit_revert | `0x0cd1a089eada37b188294d70037816db84256dfdb2c4fb02badf4af6a49c5cc0` | FINALIZED | ERROR | MAJORITY_AGREE |
+| deploy | `0x45396573bbec2684867b9acf76de04477b773ccaf783226bf6b0c5645306314e` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_alpha | `0x7ba36d454e8be67c6947792127cadf1dc1bcdb1ab0e112363b458418321f9e67` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_beta | `0x336e2613750b19b53daf1dadaa931577572f509617e998a5776d1361960cbe3e` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_gamma | `0x8ac6a0faf8964184293a45b61735ce9aa928efdae6077a37f227e380596da3e5` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| faucet_challenger | `0x6bf650f4d9efe159919d8bdc2559e032ac233f8bf2dc5d54d58562a56581ae92` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| register_alpha | `0x05505a93796d1638738c0b01a1364c0fad1dc9086d8048626230ea214de7d6a6` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| register_beta | `0x4846dcee134eec6f4dbcca3849f0d30123c7c60819ae1bb745f882467cf120f3` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| register_gamma | `0x426c669828d2910b4ec43fcf6d98a00719d7716e9b83c3193c9e4449e922335f` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| vouch_beta_to_alpha | `0x1d0a23687982c1f6123ed420ec6c0c6c44bff49b06d4a488ec54e1bb64528161` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| vouch_gamma_to_alpha | `0xee129d40c6363d1de7d90dc7139707de07e92395b36ea3ab746a173c5a1101ba` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| vouch_alpha_to_beta | `0x3d11837576b181b0640273c333690b3bb90baab50ac757c78c8e7ec1c03c8c25` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| verify_alpha_diamond | `0xc053e1028484ffb252860ebb33e7a0178b4c0337546a43212e7fc48bd4f98885` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| verify_beta_missing_fingerprint | `0xc8461e5e9ba36ace381e3df89883f521e1d1822c75d04725e55328d4b6e6557b` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| verify_gamma_fabricated_evidence | `0x4f1b03f9839f46a16b56d5c735657b149825e6a30215fb3eaa0d72e043e5cd08` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| claim_alpha_reward_and_stake | `0x024bc7b3864fe1b1b58b559c0332a79724b8518cef9916083cab3fb268cc3957` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| challenge_beta | `0xfaf6c42b950057421f92b6d3658b85a383b25c523fe3ec38a9f64cbff108f0e1` | FINALIZED | SUCCESS | MAJORITY_AGREE |
+| self_vouch_revert | `0x37c96f120df6d079f6e21a990cd41f4e3f09ec9c18652104979b6a45e10e9f78` | FINALIZED | ERROR | MAJORITY_AGREE |
+| duplicate_fingerprint_revert | `0xa20a731e02696c8cef05cff77427e4d5bace4f8276ff679c3936604b2ff7a89b` | FINALIZED | ERROR | MAJORITY_AGREE |
+| premature_stake_exit_revert | `0x35eb4c92485de3aed71e9666207559a15fe6fbfe812320f29cda8756f1cd5bc4` | FINALIZED | ERROR | MAJORITY_AGREE |
 
 ## Consensus outcomes
 
@@ -65,9 +67,9 @@ copied from CLI output.
 
 | Probe | Tx | Execution | Expected revert | Verified |
 | --- | --- | --- | --- | --- |
-| self_vouch_revert | `0xf617c52bc960e3f9951cdf4f1d2a51093c6e0e031075e57040c34f349bd42dff` | ERROR | self vouch is not allowed | True |
-| duplicate_fingerprint_revert | `0x37e083e6083bc611e73464f6a3a6718c5ba1ddaad07f0e2c84fb96f40737f43d` | ERROR | duplicate identity fingerprint | True |
-| premature_stake_exit_revert | `0x0cd1a089eada37b188294d70037816db84256dfdb2c4fb02badf4af6a49c5cc0` | ERROR | open sybil challenge pending | True |
+| self_vouch_revert | `0x37c96f120df6d079f6e21a990cd41f4e3f09ec9c18652104979b6a45e10e9f78` | ERROR | self vouch is not allowed | True |
+| duplicate_fingerprint_revert | `0xa20a731e02696c8cef05cff77427e4d5bace4f8276ff679c3936604b2ff7a89b` | ERROR | duplicate identity fingerprint | True |
+| premature_stake_exit_revert | `0x35eb4c92485de3aed71e9666207559a15fe6fbfe812320f29cda8756f1cd5bc4` | ERROR | open sybil challenge pending | True |
 
 ## Final vault accounting
 
