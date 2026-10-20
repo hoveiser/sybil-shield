@@ -220,6 +220,7 @@ contracts/sybil_shield.py            Intelligent Contract (22 methods, 12 view, 
 tests/test_sybil_shield_direct.py    103 direct mode tests
 tests/conftest.py                    Windows unlink/remove permission workaround
 scripts/deploy_studionet.py          Idempotent deploy, seed, live run and evidence writer
+scripts/verify_release.py            Recomputes the four way identity and the live state
 scripts/build_frontend_snapshot.py   Evidence -> frontend fallback snapshot
 frontend/                            React + TypeScript + Vite + Tailwind dashboard
 proofs/                              Public proof pages used by the live validators
@@ -273,6 +274,19 @@ contract. It writes:
 - `docs/evidence.md`
 - `frontend/src/deployments/studionet.json`
 - `evidence/_checkpoint.json` (gitignored, for safe reruns)
+
+### Verify the release independently
+
+```bash
+.venv/bin/python scripts/verify_release.py
+```
+
+The script ignores the recorded evidence for its own conclusions: it rehashes the
+repo file, the `HEAD` blob, the release tag blob, the code payload inside the
+deploy transaction and the code returned by `gen_getContractCode`, then compares
+the live vault and passport state with the recorded run and checks that every
+public evidence page the validators fetch is reachable. Expected output ends
+with `checks 17, failures 0`.
 
 ### Frontend
 
