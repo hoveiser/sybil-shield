@@ -1,0 +1,39 @@
+1
+00:00:00,000 --> 00:00:05,000
+SybilShield turns a social handle into a staked credential passport.
+
+2
+00:00:05,000 --> 00:00:10,000
+Free vouches and copied proof pages make reputation trivially farmable.
+
+3
+00:00:10,000 --> 00:00:15,000
+Applicants lock real SST. Peers vouch with real stake.
+
+4
+00:00:15,000 --> 00:00:20,000
+A challenger locks a bond equal to the stake before verification.
+
+5
+00:00:20,000 --> 00:00:25,000
+Validators fetch the proof page and must agree on three fields.
+
+6
+00:00:25,000 --> 00:00:30,000
+Anchor 100 is Diamond Human. Anchor 75 is Verified Contributor.
+
+7
+00:00:30,000 --> 00:00:35,000
+Anchor 40 stays provisional. Anchor 0 slashes the stake.
+
+8
+00:00:35,000 --> 00:00:40,000
+Every liability stays in vault custody until settlement is claimed.
+
+9
+00:00:40,000 --> 00:00:45,000
+Live on studionet: 18 finalized transactions and 3 guard rollbacks.
+
+10
+00:00:45,000 --> 00:00:48,000
+Four way sha256 match. github.com/hoveiser/sybil-shield
