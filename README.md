@@ -20,6 +20,7 @@ Transaction evidence: [`docs/evidence.md`](docs/evidence.md)
 | Network | GenLayer studionet, chain ID `61999` |
 | Contract | [`0xd37a39a3260aD2055a09CF89f3ecf71972695b8d`](https://genlayer-explorer.vercel.app/contracts/0xd37a39a3260aD2055a09CF89f3ecf71972695b8d) |
 | Deploy transaction | `0x94483762014a801c61d4783ac3b140a21738eeba353c2c2d4238cc4c5fed00c7` |
+| Deployed contract commit | `8a1bdf8c80fa0b4178597a11f8187be9a85fc716` |
 | Contract source sha256 | `38594a53cce92aac364ad3be10db1fb6db3af5ffb01b6cfe74b163cc0e60668e` |
 | Four-way source identity | `4 / 4` sources match (repo file, git HEAD blob, deploy calldata, on-chain code) |
 | Finalized transactions | `19`, all `FINALIZED` with `MAJORITY_AGREE` |
