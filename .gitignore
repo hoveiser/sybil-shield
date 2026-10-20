@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.gltest_cache/
+node_modules/
+dist/
+*.mp4
+*.webm
+*.wav
+evidence/_checkpoint.json
+artifacts/
