@@ -14,6 +14,7 @@ Evidence is written to evidence/studionet_deployment.json and docs/evidence.md.
 import hashlib
 import json
 import os
+import base64
 import subprocess
 import sys
 import time
@@ -24,6 +25,7 @@ from dotenv import load_dotenv
 from eth_utils import keccak
 from genlayer_py import create_account, create_client
 from genlayer_py.chains import studionet
+from genlayer_py.consensus.consensus_main import decode_tx_data
 from genlayer_py.types import TransactionStatus
 from web3 import Web3
 
@@ -241,6 +243,29 @@ def main():
     checkpoint = {}
     if CHECKPOINT.exists():
         checkpoint = json.loads(CHECKPOINT.read_text())
+    transactions = list(checkpoint.get("transactions") or [])
+    guards = list(checkpoint.get("guards") or [])
+    if not transactions and EVIDENCE_JSON.exists():
+        # Recover a previous run that predates checkpoint transaction storage.
+        prior = json.loads(EVIDENCE_JSON.read_text())
+        seen = set()
+        for item in prior.get("transactions") or []:
+            key = (item.get("step"), item.get("tx_hash"))
+            if key in seen:
+                continue
+            seen.add(key)
+            transactions.append(item)
+        if not guards:
+            guards = list(prior.get("guard_rollbacks") or [])
+
+    def persist():
+        checkpoint["transactions"] = transactions
+        checkpoint["guards"] = guards
+        CHECKPOINT.write_text(json.dumps(checkpoint, indent=2) + "\n")
+
+    def record_tx(record):
+        transactions.append(record)
+        persist()
 
     deployer = create_account(private_key)
     client = create_client(studionet, account=deployer)
@@ -252,8 +277,8 @@ def main():
     accounts = {"alpha": deployer}
     accounts.update(burners)
 
-    transactions = []
     deploy_source_code = None
+    deploy_tx_data = None
     reused = bool(
         checkpoint.get("contract_address")
         and checkpoint.get("source_sha256") == file_sha
@@ -266,12 +291,14 @@ def main():
         log("reusing deployed contract %s" % contract_address)
         receipt = with_retries("deploy readback", lambda: client.get_transaction(deploy_tx))
         deploy_record = summarize(receipt, "deploy", "SUCCESS")
-        transactions.append(deploy_record)
+        if not any(tx["step"] == "deploy" and tx["tx_hash"] == deploy_tx for tx in transactions):
+            record_tx(deploy_record)
         decoded = receipt.get("tx_data_decoded") or {}
         deploy_source_code = decoded.get("code")
+        deploy_tx_data = receipt.get("tx_data")
         checkpoint["deploy_execution"] = deploy_record["execution_result"]
         checkpoint["deploy_consensus"] = deploy_record["consensus_result"]
-        CHECKPOINT.write_text(json.dumps(checkpoint, indent=2) + "\n")
+        persist()
     else:
         log("deploying contract")
         tx = client.deploy_contract(source_bytes.decode("utf-8"), account=deployer)
@@ -292,9 +319,9 @@ def main():
         if not contract_address:
             raise SystemExit("deploy receipt did not expose a contract address")
         deploy_record = summarize(receipt, "deploy", "SUCCESS")
-        transactions.append(deploy_record)
         deploy_tx = deploy_record["tx_hash"]
         deploy_source_code = decoded.get("code")
+        deploy_tx_data = receipt.get("tx_data")
         checkpoint = {
             "contract_address": contract_address,
             "deploy_tx": deploy_tx,
@@ -304,7 +331,9 @@ def main():
             "source_sha256": file_sha,
             "started": started,
         }
-        CHECKPOINT.write_text(json.dumps(checkpoint, indent=2) + "\n")
+        transactions.clear()
+        guards.clear()
+        record_tx(deploy_record)
         log("deployed at %s" % contract_address)
 
     # Fund the demo signers with native GEN for gas. Native transfers are
@@ -322,7 +351,7 @@ def main():
             record = send_write(
                 client, contract_address, "faucet_or_deposit", [400 * ATTO], account, "faucet_" + role
             )
-            transactions.append(record)
+            record_tx(record)
             assert observed_matches(record, "SUCCESS"), record
 
     # Register the three passport claims.
@@ -347,7 +376,7 @@ def main():
             accounts[role],
             "register_" + role,
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
         passport_ids[role] = find_passport_id(client, contract_address, spec["handle"])
 
@@ -372,7 +401,7 @@ def main():
             accounts[voucher_role],
             "vouch_" + voucher_role + "_to_" + target_role,
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
 
     # Live consensus run 1: the alpha claim should become an active passport.
@@ -386,7 +415,7 @@ def main():
             deployer,
             "verify_alpha_diamond",
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
     alpha_state = read_view(client, contract_address, "get_passport", [passport_ids["alpha"]])
     log("alpha band %s status %s" % (alpha_state["trust_band"], alpha_state["status"]))
@@ -405,7 +434,7 @@ def main():
             burners["beta"],
             "verify_beta_missing_fingerprint",
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
     beta_state = read_view(client, contract_address, "get_passport", [passport_ids["beta"]])
     log("beta band %s status %s" % (beta_state["trust_band"], beta_state["status"]))
@@ -424,7 +453,7 @@ def main():
             burners["gamma"],
             "verify_gamma_fabricated_evidence",
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
     gamma_state = read_view(client, contract_address, "get_passport", [passport_ids["gamma"]])
     log("gamma band %s status %s" % (gamma_state["trust_band"], gamma_state["status"]))
@@ -442,7 +471,7 @@ def main():
             deployer,
             "claim_alpha_reward_and_stake",
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
 
     # Move SST between wallets to prove the ledger is live.
@@ -456,7 +485,7 @@ def main():
             deployer,
             "transfer_alpha_to_beta",
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
 
     # Challenge escrow: the challenger locks a bond equal to the beta stake.
@@ -470,11 +499,12 @@ def main():
             burners["challenger"],
             "challenge_beta",
         )
-        transactions.append(record)
+        record_tx(record)
         assert observed_matches(record, "SUCCESS"), record
 
-    # Guard probes. Each one is an expected on chain rollback.
-    guards = []
+    # Guard probes. Each one is an expected on chain rollback. Results are
+    # reused on a rerun so the same contract is never probed twice.
+    completed_guards = {guard["step"] for guard in guards}
     guard_plan = [
         (
             "self_vouch_revert",
@@ -505,12 +535,15 @@ def main():
         ),
     ]
     for step, reason, function_name, args, account in guard_plan:
+        if step in completed_guards:
+            log("guard %s already recorded" % step)
+            continue
         record = send_write(
             client, contract_address, function_name, args, account, step, expected="ROLLBACK"
         )
         record["expected_reason"] = reason
         record["verified"] = observed_matches(record, "ROLLBACK")
-        transactions.append(record)
+        record_tx(record)
         guards.append(
             {
                 "step": step,
@@ -522,6 +555,7 @@ def main():
         )
         if not record["verified"]:
             raise SystemExit("guard %s did not roll back as expected" % step)
+        persist()
 
     # Final on chain reads.
     final_passports = {}
@@ -543,19 +577,31 @@ def main():
     )["result"]
     if isinstance(onchain_code, dict):
         onchain_code = onchain_code.get("code") or onchain_code.get("result") or ""
-    if isinstance(onchain_code, str) and onchain_code.startswith("0x"):
+    onchain_bytes = b""
+    if isinstance(onchain_code, str) and onchain_code:
         try:
-            onchain_bytes = bytes.fromhex(onchain_code[2:])
-        except ValueError:
+            candidate = base64.b64decode(onchain_code, validate=True)
+            if b"Depends" in candidate[:400] or candidate.startswith(b"#"):
+                onchain_bytes = candidate
+            else:
+                onchain_bytes = onchain_code.encode("utf-8")
+        except Exception:
             onchain_bytes = onchain_code.encode("utf-8")
-    elif isinstance(onchain_code, str):
-        onchain_bytes = onchain_code.encode("utf-8")
-    else:
+    elif onchain_code:
         onchain_bytes = bytes(onchain_code)
 
     deploy_record = next((tx for tx in transactions if tx["step"] == "deploy"), None)
     deploy_code_bytes = deploy_source_code.encode("utf-8") if isinstance(deploy_source_code, str) else None
-    if deploy_code_bytes is None and checkpoint.get("deploy_tx"):
+    if deploy_code_bytes is None and deploy_tx_data:
+        try:
+            raw_tx = deploy_tx_data[2:] if deploy_tx_data.startswith("0x") else deploy_tx_data
+            decoded_payload = decode_tx_data(bytes.fromhex(raw_tx))
+            tx_code = decoded_payload.get("code") if isinstance(decoded_payload, dict) else None
+            if isinstance(tx_code, str):
+                deploy_code_bytes = tx_code.encode("utf-8")
+        except Exception as exc:  # noqa: BLE001 - recorded as unavailable evidence
+            log("could not decode deploy calldata: %s" % type(exc).__name__)
+    if deploy_code_bytes is None and checkpoint.get("deploy_tx") and deploy_record is None:
         deploy_record = {
             "step": "deploy",
             "tx_hash": checkpoint["deploy_tx"],
