@@ -22,6 +22,7 @@ MIN_STAKE = 25 * ATTO
 MAX_STAKE = 5000 * ATTO
 MIN_VOUCH = 5 * ATTO
 MAX_VOUCH = 500 * ATTO
+MAX_VOUCHERS = 12
 FAUCET_CALL_CAP = 2000 * ATTO
 FAUCET_ACCOUNT_CAP = 20000 * ATTO
 BASE_REWARD = 12 * ATTO
@@ -118,8 +119,26 @@ def _is_https_url(value: str) -> bool:
         return False
     if not value.startswith("https://"):
         return False
-    for bad in (" ", "\n", "\t", "javascript:"):
+    for bad in (" ", "\n", "\t", "javascript:", "\"", "'", "<", ">", "`"):
         if bad in value.lower():
+            return False
+    return True
+
+
+def _valid_handle(value: str) -> bool:
+    if len(value) < 3 or len(value) > 64:
+        return False
+    for ch in value:
+        if not (ch.isalnum() or ch in "._-"):
+            return False
+    return True
+
+
+def _valid_fingerprint(value: str) -> bool:
+    if len(value) < 16 or len(value) > 128:
+        return False
+    for ch in value:
+        if not (ch.isalnum() or ch in ":._-"):
             return False
     return True
 
@@ -430,14 +449,16 @@ class SybilShield(gl.Contract):
 
         if len(clean_handle) < 3:
             raise gl.vm.UserError("[EXPECTED] handle too short")
-        if " " in clean_handle:
-            raise gl.vm.UserError("[EXPECTED] handle must not contain spaces")
+        if not _valid_handle(clean_handle):
+            raise gl.vm.UserError("[EXPECTED] handle contains unsupported characters")
         if clean_category not in CATEGORIES:
             raise gl.vm.UserError("[EXPECTED] unsupported domain category")
         if not _is_https_url(clean_url):
             raise gl.vm.UserError("[EXPECTED] proof url must be a bounded https url")
         if len(clean_fingerprint) < 16:
             raise gl.vm.UserError("[EXPECTED] identity fingerprint too short")
+        if not _valid_fingerprint(clean_fingerprint):
+            raise gl.vm.UserError("[EXPECTED] fingerprint contains unsupported characters")
         if stake < MIN_STAKE:
             raise gl.vm.UserError("[EXPECTED] stake below protocol floor")
         if stake > MAX_STAKE:
@@ -514,6 +535,8 @@ class SybilShield(gl.Contract):
         existing = self.vouches.get(key, None)
         if existing is not None and existing.active:
             raise gl.vm.UserError("[EXPECTED] duplicate vouch for passport")
+        if len(p.voucher_registry) > 0 and len(p.voucher_registry.split(";")) >= MAX_VOUCHERS:
+            raise gl.vm.UserError("[EXPECTED] voucher cap reached for this passport")
 
         self._debit(voucher, amount)
         self._lock(amount)
@@ -544,7 +567,9 @@ class SybilShield(gl.Contract):
             raise gl.vm.UserError("[EXPECTED] no active vouch for caller")
         if p.status == STATUS_SLASHED:
             raise gl.vm.UserError("[EXPECTED] vouch stake was slashed")
-        if p.status in (STATUS_PROVISIONAL, STATUS_CHALLENGED):
+        if p.status == STATUS_CHALLENGED:
+            raise gl.vm.UserError("[EXPECTED] vouch locked while a sybil challenge is open")
+        if p.status not in (STATUS_PROVISIONAL, STATUS_ACTIVE, STATUS_UNVERIFIED, STATUS_WITHDRAWN):
             raise gl.vm.UserError("[EXPECTED] vouch locked while verification is pending")
         amount = int(record.amount)
         record.active = False
@@ -588,7 +613,8 @@ class SybilShield(gl.Contract):
         if challenger == p.holder:
             raise gl.vm.UserError("[EXPECTED] self challenge is not allowed")
         vouch_key = self._vouch_key(passport_id, challenger)
-        if self.vouches.get(vouch_key, None) is not None:
+        existing_vouch = self.vouches.get(vouch_key, None)
+        if existing_vouch is not None and existing_vouch.active:
             raise gl.vm.UserError("[EXPECTED] voucher cannot challenge its own passport")
         if bond != int(p.stake_amount):
             raise gl.vm.UserError("[EXPECTED] challenger bond must equal the staked amount")
@@ -607,6 +633,25 @@ class SybilShield(gl.Contract):
         self._log(challenger, "CHALLENGE", "passport " + str(int(passport_id)) + " bond " + str(bond))
 
     @gl.public.write
+    def update_proof_url(self, passport_id: u256, new_proof_url: str) -> None:
+        """Holder recovery path for a proof page that moved or went offline."""
+        p = self._require_passport(passport_id)
+        caller = gl.message.sender_address
+        if caller != p.holder:
+            raise gl.vm.UserError("[EXPECTED] only the passport holder can replace the evidence url")
+        if p.challenge_open:
+            raise gl.vm.UserError("[EXPECTED] evidence is frozen while a challenge is open")
+        if p.status not in (STATUS_PROVISIONAL, STATUS_UNVERIFIED):
+            raise gl.vm.UserError("[EXPECTED] evidence is frozen after settlement")
+        clean_url = _sanitize_text(new_proof_url, 400)
+        if not _is_https_url(clean_url):
+            raise gl.vm.UserError("[EXPECTED] proof url must be a bounded https url")
+        p.proof_url = clean_url
+        p.verification_note = "evidence url replaced by the holder, awaiting verification"
+        self.passports[passport_id] = p
+        self._log(caller, "UPDATE_EVIDENCE", "passport " + str(int(passport_id)) + " evidence url replaced")
+
+    @gl.public.write
     def verify_passport_credential_live(self, passport_id: u256) -> None:
         """Live validator consensus over the public evidence.
 
@@ -617,6 +662,8 @@ class SybilShield(gl.Contract):
         p = self._require_passport(passport_id)
         if p.status in (STATUS_SLASHED, STATUS_ACTIVE, STATUS_WITHDRAWN):
             raise gl.vm.UserError("[EXPECTED] passport is not verifiable in its current status")
+        if int(p.holder_claimable) > 0 or int(p.challenger_claimable) > 0:
+            raise gl.vm.UserError("[EXPECTED] settle pending claims before a new verification round")
 
         handle = p.handle
         category = p.domain_category
@@ -631,8 +678,17 @@ class SybilShield(gl.Contract):
         def evaluate() -> dict:
             if not _is_https_url(proof_url):
                 raise gl.vm.UserError("[EXPECTED] proof url must be a bounded https url")
-            page_raw = gl.nondet.web.render(proof_url, mode="text")
-            page = _sanitize_text(page_raw, MAX_EVIDENCE_CHARS)
+            try:
+                page_raw = gl.nondet.web.render(proof_url, mode="text")
+                page = _sanitize_text(page_raw, MAX_EVIDENCE_CHARS)
+            except Exception:
+                return {
+                    "trust_band": UNVERIFIED_PROVISIONAL,
+                    "authenticity_anchor": 40,
+                    "fingerprint_matched": False,
+                    "evidence_digest": _evidence_digest(handle, fingerprint, "", 40),
+                    "reason": "proof page could not be fetched, verification withheld",
+                }
             if len(page) < 120:
                 return {
                     "trust_band": UNVERIFIED_PROVISIONAL,
@@ -644,8 +700,13 @@ class SybilShield(gl.Contract):
 
             fraud_page = ""
             if len(fraud_url) > 0:
-                fraud_raw = gl.nondet.web.render(fraud_url, mode="text")
-                fraud_page = _sanitize_text(fraud_raw, MAX_EVIDENCE_CHARS)
+                try:
+                    fraud_raw = gl.nondet.web.render(fraud_url, mode="text")
+                    fraud_page = _sanitize_text(fraud_raw, MAX_EVIDENCE_CHARS)
+                except Exception:
+                    # The challenger carries the burden of proof. An unreachable
+                    # fraud report must not block the passport verification.
+                    fraud_page = ""
 
             handle_l = handle.lower()
             fingerprint_l = fingerprint.lower()
@@ -1088,6 +1149,7 @@ class SybilShield(gl.Contract):
             "max_stake": str(MAX_STAKE),
             "min_vouch": str(MIN_VOUCH),
             "max_vouch": str(MAX_VOUCH),
+            "max_vouchers": MAX_VOUCHERS,
             "faucet_call_cap": str(FAUCET_CALL_CAP),
             "faucet_account_cap": str(FAUCET_ACCOUNT_CAP),
             "base_reward": str(BASE_REWARD),

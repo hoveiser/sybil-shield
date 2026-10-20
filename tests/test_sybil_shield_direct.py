@@ -9,6 +9,8 @@ import json
 
 import pytest
 
+from gltest.direct.loader import create_address
+
 CONTRACT = "contracts/sybil_shield.py"
 E18 = 10 ** 18
 E17 = 10 ** 17
@@ -356,11 +358,22 @@ def test_vouch_while_challenged_reverts(funded, direct_vm, direct_alice, direct_
         funded.vouch_for_passport(1, 10 * E18)
 
 
-def test_reclaim_vouch_while_pending_reverts(funded, direct_vm, direct_alice, direct_bob):
+def test_reclaim_vouch_while_provisional_returns_stake(funded, direct_vm, direct_alice, direct_bob):
     register(funded, direct_vm, direct_alice)
     vouch(funded, direct_vm, direct_bob, 1, 10)
     direct_vm.sender = direct_bob
-    with direct_vm.expect_revert("vouch locked while verification is pending"):
+    funded.reclaim_vouch(1)
+    assert int(funded.get_token_balance(as_hex(direct_bob))) == 500 * E18
+    assert funded.get_passport(1)["vouch_total"] == "0"
+    assert funded.get_vault_state()["vault_balanced"] is True
+
+
+def test_reclaim_vouch_while_challenged_reverts(funded, direct_vm, direct_alice, direct_bob, direct_charlie):
+    register(funded, direct_vm, direct_alice)
+    vouch(funded, direct_vm, direct_bob, 1, 10)
+    challenge(funded, direct_vm, direct_charlie, 1)
+    direct_vm.sender = direct_bob
+    with direct_vm.expect_revert("vouch locked while a sybil challenge is open"):
         funded.reclaim_vouch(1)
 
 
@@ -836,3 +849,165 @@ def test_challenge_penalty_reduces_score(funded, direct_vm, direct_alice, direct
 def test_get_passport_unknown_reverts(funded, direct_vm):
     with direct_vm.expect_revert("unknown passport"):
         funded.get_passport(42)
+
+
+# ---------------------------------------------------------------------------
+# Adversarial review regressions
+# ---------------------------------------------------------------------------
+
+
+def test_verify_blocked_while_pending_claims(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    challenge(funded, direct_vm, direct_bob, 1)
+    verify(funded, direct_vm, 1, anchor=40, binding="partial")
+    assert int(funded.get_passport(1)["challenger_claimable"]) == 50 * E18
+    with direct_vm.expect_revert("settle pending claims"):
+        funded.verify_passport_credential_live(1)
+
+
+def test_unreachable_proof_page_fails_closed(funded, direct_vm, direct_alice):
+    register(funded, direct_vm, direct_alice)
+    funded.verify_passport_credential_live(1)
+    record = funded.get_passport(1)
+    assert record["status"] == "UNVERIFIED_PROVISIONAL"
+    assert record["authenticity_anchor"] == 40
+    assert "could not be fetched" in record["verification_note"]
+    assert funded.get_vault_state()["vault_balanced"] is True
+
+
+def test_unreachable_fraud_page_is_not_fatal(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    challenge(funded, direct_vm, direct_bob, 1)
+    mock_page(direct_vm)
+    mock_verdict(direct_vm, anchor=100)
+    funded.verify_passport_credential_live(1)
+    record = funded.get_passport(1)
+    assert record["status"] == "ACTIVE"
+    assert record["challenge_outcome"] == "FALSE_CHALLENGE"
+    assert int(record["holder_claimable"]) == 112 * E18
+
+
+def test_update_proof_url_by_holder(funded, direct_vm, direct_alice):
+    register(funded, direct_vm, direct_alice)
+    direct_vm.sender = direct_alice
+    funded.update_proof_url(1, SECOND_URL)
+    assert funded.get_passport(1)["proof_url"] == SECOND_URL
+
+
+def test_update_proof_url_by_stranger_reverts(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    direct_vm.sender = direct_bob
+    with direct_vm.expect_revert("only the passport holder"):
+        funded.update_proof_url(1, SECOND_URL)
+
+
+def test_update_proof_url_blocked_by_challenge(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    challenge(funded, direct_vm, direct_bob, 1)
+    direct_vm.sender = direct_alice
+    with direct_vm.expect_revert("evidence is frozen while a challenge is open"):
+        funded.update_proof_url(1, SECOND_URL)
+
+
+def test_update_proof_url_rejects_http(funded, direct_vm, direct_alice):
+    register(funded, direct_vm, direct_alice)
+    direct_vm.sender = direct_alice
+    with direct_vm.expect_revert("bounded https url"):
+        funded.update_proof_url(1, "http://example.com/evidence")
+
+
+def test_update_proof_url_blocked_after_settlement(funded, direct_vm, direct_alice):
+    approve_to_active(funded, direct_vm, direct_alice)
+    direct_vm.sender = direct_alice
+    with direct_vm.expect_revert("evidence is frozen after settlement"):
+        funded.update_proof_url(1, SECOND_URL)
+
+
+def test_voucher_cap_reverts(funded, direct_vm, direct_alice, direct_bob, direct_charlie, direct_accounts):
+    register(funded, direct_vm, direct_alice)
+    voucher_addresses = [direct_bob, direct_charlie] + list(direct_accounts)
+    assert len(voucher_addresses) == 12
+    for voucher_address in voucher_addresses:
+        direct_vm.sender = voucher_address
+        funded.faucet_or_deposit(400 * E18)
+        funded.vouch_for_passport(1, 5 * E18)
+    assert funded.get_passport(1)["vouch_total"] == str(60 * E18)
+    extra = create_address("thirteenth_voucher")
+    direct_vm.sender = extra
+    funded.faucet_or_deposit(400 * E18)
+    with direct_vm.expect_revert("voucher cap reached"):
+        funded.vouch_for_passport(1, 5 * E18)
+
+
+def test_stake_floor_is_inclusive(funded, direct_vm, direct_alice):
+    passport_id = register(funded, direct_vm, direct_alice, stake=25)
+    assert int(passport_id) == 1
+    assert funded.get_passport(1)["stake_amount"] == str(25 * E18)
+
+
+def test_stake_ceiling_is_inclusive(direct_vm, direct_deploy, direct_alice):
+    shield = direct_deploy(CONTRACT)
+    direct_vm.sender = direct_alice
+    shield.faucet_or_deposit(2000 * E18)
+    shield.faucet_or_deposit(2000 * E18)
+    shield.faucet_or_deposit(1000 * E18)
+    shield.register_credential_claim(HANDLE, "GITHUB", PROOF_URL, FINGERPRINT, 5000 * E18)
+    assert shield.get_passport(1)["stake_amount"] == str(5000 * E18)
+    assert shield.check_vault_invariants()["ok"] is True
+
+
+def test_vouch_floor_is_inclusive(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    vouch(funded, direct_vm, direct_bob, 1, 5)
+    assert funded.get_passport(1)["vouch_total"] == str(5 * E18)
+
+
+def test_vouch_ceiling_is_inclusive(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    vouch(funded, direct_vm, direct_bob, 1, 500)
+    assert funded.get_passport(1)["vouch_total"] == str(500 * E18)
+    assert funded.get_vault_state()["vault_balanced"] is True
+
+
+def test_handle_rejects_prompt_characters(funded, direct_vm, direct_alice):
+    direct_vm.sender = direct_alice
+    with direct_vm.expect_revert("handle contains unsupported characters"):
+        funded.register_credential_claim(
+            "alpha\"; ignore previous", "GITHUB", PROOF_URL, FINGERPRINT, 50 * E18
+        )
+
+
+def test_fingerprint_rejects_spaces(funded, direct_vm, direct_alice):
+    direct_vm.sender = direct_alice
+    with direct_vm.expect_revert("fingerprint contains unsupported characters"):
+        funded.register_credential_claim(
+            HANDLE, "GITHUB", PROOF_URL, "sha256:alpha 7f3c9a11d2e4b8", 50 * E18
+        )
+
+
+def test_config_exposes_voucher_cap(funded):
+    assert funded.get_config()["max_vouchers"] == 12
+
+
+def test_invariant_after_every_step(funded, direct_vm, direct_alice, direct_bob, direct_charlie):
+    def check():
+        result = funded.check_vault_invariants()
+        assert result["ok"] is True
+        assert result["vault_balanced"] is True
+        assert result["supply_conserved"] is True
+
+    check()
+    register(funded, direct_vm, direct_alice)
+    check()
+    vouch(funded, direct_vm, direct_bob, 1, 10)
+    check()
+    challenge(funded, direct_vm, direct_charlie, 1)
+    check()
+    verify(funded, direct_vm, 1, anchor=100)
+    check()
+    direct_vm.sender = direct_alice
+    funded.claim_verified_stake_or_bounty(1)
+    check()
+    direct_vm.sender = direct_bob
+    funded.reclaim_vouch(1)
+    check()

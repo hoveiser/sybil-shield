@@ -81,6 +81,10 @@ register_credential_claim
         +--> challenge_sybil_passport (bond == stake, bond locked in vault)
                     |
                     v
+update_proof_url (holder, provisional only, blocked while challenged)
+  replace a moved or offline proof page
+        |
+        v
 verify_passport_credential_live
   snapshot storage into locals
   gl.nondet.web.render(proof_url) and fraud page
@@ -162,12 +166,20 @@ Every counterparty is treated as adversarial.
   before any token moves.
 - **Post-slash lockdown.** A slashed passport rejects vouches and voucher
   reclaims.
+- **Bounded vouches.** A passport accepts at most 12 staked vouchers, which
+  bounds the registry string and the storage cost of any single passport.
+- **Evidence recovery.** The holder can replace the proof URL while the passport
+  is provisional and unchallenged, so a moved or offline page cannot strand the
+  stake. After settlement, the evidence is frozen.
+- **Challenge burden of proof.** An unreachable fraud report is treated as no
+  evidence, not as a reason to block the passport. The challenger chose that URL
+  and their bond is at risk if the accusation cannot be supported.
 
 ## Repository layout
 
 ```text
-contracts/sybil_shield.py            Intelligent Contract (21 methods, 12 view, 9 write)
-tests/test_sybil_shield_direct.py    79 direct mode tests
+contracts/sybil_shield.py            Intelligent Contract (22 methods, 12 view, 10 write)
+tests/test_sybil_shield_direct.py    97 direct mode tests
 tests/conftest.py                    Windows unlink/remove permission workaround
 scripts/deploy_studionet.py          Idempotent deploy, seed, live run and evidence writer
 scripts/build_frontend_snapshot.py   Evidence -> frontend fallback snapshot
@@ -206,7 +218,7 @@ python3 -m venv .venv
 .venv/bin/python -m pytest tests/ -q
 ```
 
-Expected: `genvm-lint` reports zero errors, and `79 passed` in direct mode.
+Expected: `genvm-lint` reports zero errors, and `97 passed` in direct mode.
 
 ### Studionet deployment
 
@@ -279,7 +291,7 @@ burned-in text is exactly 24px.
 
 ## Testing
 
-The direct suite runs the contract in the GenVM direct runner and covers 79
+The direct suite runs the contract in the GenVM direct runner and covers 97
 tests across:
 
 - SST ledger: faucet caps, transfers, conservation, insufficient balance.

@@ -166,12 +166,9 @@ function bytesToHex(buffer: ArrayBuffer): string {
 
 export async function verifyOnchainSource(): Promise<SourceCheck> {
   const client = ensureReadClient();
-  const encoded = await client.getContractCode(CONTRACT_ADDRESS);
-  const binary = atob(encoded);
-  const bytes = new Uint8Array(binary.length);
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
+  // genlayer-js decodes gen_getContractCode from base64 to the source text.
+  const source = await client.getContractCode(CONTRACT_ADDRESS);
+  const bytes = new TextEncoder().encode(source);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   const onchainSha256 = bytesToHex(digest);
   return {
