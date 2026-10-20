@@ -599,7 +599,9 @@ def main():
             raw_tx = deploy_tx_data[2:] if deploy_tx_data.startswith("0x") else deploy_tx_data
             decoded_payload = decode_tx_data(bytes.fromhex(raw_tx))
             tx_code = decoded_payload.get("code") if isinstance(decoded_payload, dict) else None
-            if isinstance(tx_code, str):
+            if isinstance(tx_code, str) and tx_code.startswith("0x"):
+                deploy_code_bytes = bytes.fromhex(tx_code[2:])
+            elif isinstance(tx_code, str):
                 deploy_code_bytes = tx_code.encode("utf-8")
         except Exception as exc:  # noqa: BLE001 - recorded as unavailable evidence
             log("could not decode deploy calldata: %s" % type(exc).__name__)
