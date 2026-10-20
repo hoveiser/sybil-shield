@@ -25,6 +25,8 @@ def main():
         "address": evidence["contract_address"],
         "deployTx": evidence["deploy_tx"],
         "sourceSha256": evidence["source_sha256"],
+        "sourceCommit": evidence.get("source_commit"),
+        "deployedAt": deployment.get("deployedAt"),
         "finishedAt": evidence["finished_at"],
         "explorer": evidence["explorer"],
         "config": evidence["config"],

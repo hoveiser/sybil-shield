@@ -331,6 +331,22 @@ class SybilShield(gl.Contract):
     def _vouch_key(self, passport_id: u256, voucher: Address) -> str:
         return str(int(passport_id)) + ":" + voucher.as_hex.lower()
 
+    def _index_taken(self, occupant_id: int) -> bool:
+        """An identity index blocks new claims only while its passport is live.
+
+        WITHDRAWN passports released their stake, so they must also release the
+        handle and fingerprint index. Otherwise a sybil could register a victim
+        handle, take one inconclusive round, withdraw, and burn the name for the
+        real owner forever. SLASHED passports stay quarantined.
+        """
+        if occupant_id == 0:
+            return False
+        if occupant_id >= int(self.next_passport_id):
+            # Unknown passport id behind a known index: fail closed.
+            return True
+        occupant = self.passports[u256(occupant_id)]
+        return occupant.status != STATUS_WITHDRAWN
+
     # ------------------------------------------------------------------
     # The single coherent trust invariant helper. Leaderboard ranking,
     # sybil gating, and settlement payouts all derive from this function.
@@ -465,10 +481,10 @@ class SybilShield(gl.Contract):
             raise gl.vm.UserError("[EXPECTED] stake above protocol ceiling")
 
         fingerprint_key = clean_fingerprint.lower()
-        if self.fingerprint_owner.get(fingerprint_key, u256(0)) != 0:
+        if self._index_taken(int(self.fingerprint_owner.get(fingerprint_key, u256(0)))):
             raise gl.vm.UserError("[EXPECTED] duplicate identity fingerprint")
         handle_key = clean_category + ":" + clean_handle.lower()
-        if self.handle_owner.get(handle_key, u256(0)) != 0:
+        if self._index_taken(int(self.handle_owner.get(handle_key, u256(0)))):
             raise gl.vm.UserError("[EXPECTED] duplicate handle for this domain")
 
         self._debit(holder, stake)
@@ -563,7 +579,13 @@ class SybilShield(gl.Contract):
         p = self._require_passport(passport_id)
         key = self._vouch_key(passport_id, voucher)
         record = self.vouches.get(key, None)
-        if record is None or not record.active:
+        if record is None:
+            raise gl.vm.UserError("[EXPECTED] no active vouch for caller")
+        if not record.active:
+            # A retired record on a slashed passport means the stake was
+            # confiscated, which is a different answer than "never vouched".
+            if p.status == STATUS_SLASHED:
+                raise gl.vm.UserError("[EXPECTED] vouch stake was slashed")
             raise gl.vm.UserError("[EXPECTED] no active vouch for caller")
         if p.status == STATUS_SLASHED:
             raise gl.vm.UserError("[EXPECTED] vouch stake was slashed")
@@ -859,6 +881,7 @@ class SybilShield(gl.Contract):
         p.holder_claimable = u256(0)
         p.slashed_vouch_amount = u256(vouch_snapshot)
         p.challenge_open = False
+        self._retire_vouches(passport_id, p)
         if bond_snapshot > 0 and status_snapshot == STATUS_CHALLENGED:
             p.challenger_claimable = u256(stake_snapshot + vouch_snapshot + bond_snapshot)
             p.challenge_outcome = "SYBIL_CONFIRMED"
@@ -873,8 +896,32 @@ class SybilShield(gl.Contract):
         self._log(
             gl.message.sender_address,
             "SLASH",
-            "passport " + str(int(passport_id)) + " stake " + str(stake_snapshot),
+            "passport "
+            + str(int(passport_id))
+            + " stake "
+            + str(stake_snapshot)
+            + " vouches "
+            + str(vouch_snapshot),
         )
+
+    def _retire_vouches(self, passport_id: u256, p: PassportCredential) -> None:
+        """Mark confiscated voucher stakes inactive and clear the registry.
+
+        The slashed voucher stakes are paid out through challenger_claimable or
+        moved into the protocol reserve, so their records must not stay active.
+        """
+        if len(p.voucher_registry) == 0:
+            return
+        for chunk in p.voucher_registry.split(";"):
+            parts = chunk.split("=")
+            if len(parts) != 2:
+                continue
+            key = self._vouch_key(passport_id, self._as_address(parts[0]))
+            record = self.vouches.get(key, None)
+            if record is not None and record.active:
+                record.active = False
+                self.vouches[key] = record
+        p.voucher_registry = ""
 
     @gl.public.write
     def claim_verified_stake_or_bounty(self, passport_id: u256) -> u256:
@@ -914,6 +961,10 @@ class SybilShield(gl.Contract):
         p.settled = True
         p.verification_note = "holder exited after an unverified round"
         self.passports[passport_id] = p
+        # Release the identity indexes so exiting cannot burn a handle or a
+        # fingerprint for the next claimant.
+        self.fingerprint_owner[p.identity_fingerprint.lower()] = u256(0)
+        self.handle_owner[p.domain_category + ":" + p.handle.lower()] = u256(0)
         self._unlock_to(caller, amount)
         self._log(caller, "WITHDRAW", "passport " + str(int(passport_id)) + " amount " + str(amount))
 

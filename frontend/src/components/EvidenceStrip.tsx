@@ -82,7 +82,12 @@ export function EvidenceStrip({ snapshot, sourceCheck, verifying, onVerify }: Ev
           <div className="col-span-2 rounded-xl border border-edge/60 bg-white/[0.015] p-3">
             <p className="label">Network</p>
             <p className="mono mt-1 text-xs text-white/75">studionet · chain {snapshot.chainId}</p>
-            <p className="mono mt-0.5 text-[9px] text-mist">deployed {new Date(snapshot.finishedAt).toUTCString()}</p>
+            <p className="mono mt-0.5 text-[9px] text-mist">
+              deployed {new Date(DEPLOYMENT.deployedAt).toUTCString()}
+            </p>
+            <p className="mono mt-0.5 text-[9px] text-mist">
+              commit {shortHash(DEPLOYMENT.deployedCommit, 7)} · evidence {new Date(snapshot.finishedAt).toUTCString()}
+            </p>
           </div>
           <a
             href="https://github.com/hoveiser/sybil-shield/blob/main/docs/evidence.md"

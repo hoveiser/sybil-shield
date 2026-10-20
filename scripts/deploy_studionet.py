@@ -259,6 +259,18 @@ def contract_dirty():
         return True
 
 
+def deployed_commit():
+    """The last commit that changed the contract source is the deployed commit."""
+    try:
+        return subprocess.check_output(
+            ["git", "log", "-1", "--format=%H", "--", "contracts/sybil_shield.py"],
+            cwd=str(ROOT),
+            text=True,
+        ).strip()
+    except Exception:
+        return None
+
+
 def main():
     started = now_iso()
     private_key = load_env()
@@ -317,6 +329,7 @@ def main():
 
     deploy_source_code = None
     deploy_tx_data = None
+    deploy_created_at = checkpoint.get("deploy_created_at")
     reused = bool(
         checkpoint.get("contract_address")
         and checkpoint.get("source_sha256") == file_sha
@@ -334,6 +347,8 @@ def main():
         decoded = receipt.get("tx_data_decoded") or {}
         deploy_source_code = decoded.get("code")
         deploy_tx_data = receipt.get("tx_data")
+        deploy_created_at = receipt.get("created_at") or deploy_created_at
+        checkpoint["deploy_created_at"] = deploy_created_at
         checkpoint["deploy_execution"] = deploy_record["execution_result"]
         checkpoint["deploy_consensus"] = deploy_record["consensus_result"]
         persist()
@@ -362,10 +377,12 @@ def main():
         deploy_tx = deploy_record["tx_hash"]
         deploy_source_code = decoded.get("code")
         deploy_tx_data = receipt.get("tx_data")
+        deploy_created_at = receipt.get("created_at")
         checkpoint = {
             "contract_address": contract_address,
             "deploy_tx": deploy_tx,
             "deploy_status": receipt.get("status_name"),
+            "deploy_created_at": deploy_created_at,
             "deploy_execution": deploy_record["execution_result"],
             "deploy_consensus": deploy_record["consensus_result"],
             "source_sha256": file_sha,
@@ -676,6 +693,8 @@ def main():
         "finished_at": now_iso(),
         "contract_address": contract_address,
         "deploy_tx": checkpoint.get("deploy_tx") or (deploy_record or {}).get("tx_hash"),
+        "deploy_created_at": deploy_created_at,
+        "source_commit": deployed_commit(),
         "source_sha256": file_sha,
         "source_identity": {
             "hashes": hashes,
@@ -722,7 +741,9 @@ def main():
                 "address": contract_address,
                 "deployTx": evidence["deploy_tx"],
                 "sourceSha256": file_sha,
-                "deployedAt": evidence["finished_at"],
+                "deployedAt": evidence["deploy_created_at"] or evidence["finished_at"],
+                "evidenceRecordedAt": evidence["finished_at"],
+                "deployedCommit": deployed_commit(),
                 "explorer": EXPLORER,
             },
             indent=2,
@@ -755,6 +776,10 @@ def write_markdown(evidence):
     lines.append("- Network: studionet (chain ID %d)" % evidence["chain_id"])
     lines.append("- Contract: `%s`" % evidence["contract_address"])
     lines.append("- Deploy transaction: `%s`" % evidence["deploy_tx"])
+    if evidence.get("deploy_created_at"):
+        lines.append("- Deploy transaction created: %s" % evidence["deploy_created_at"])
+    if evidence.get("source_commit"):
+        lines.append("- Deployed contract commit: `%s`" % evidence["source_commit"])
     lines.append("- Source sha256: `%s`" % evidence["source_sha256"])
     lines.append("- Four way source match: `%s`" % evidence["source_identity"]["four_way_match"])
     lines.append("- Finished at: %s" % evidence["finished_at"])

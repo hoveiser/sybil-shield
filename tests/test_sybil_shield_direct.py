@@ -1011,3 +1011,85 @@ def test_invariant_after_every_step(funded, direct_vm, direct_alice, direct_bob,
     direct_vm.sender = direct_bob
     funded.reclaim_vouch(1)
     check()
+
+
+# ---------------------------------------------------------------------------
+# Identity squatting and confiscated voucher records
+# ---------------------------------------------------------------------------
+
+
+def test_withdrawal_releases_the_identity_index(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    verify(funded, direct_vm, 1, anchor=40, binding="partial")
+    direct_vm.sender = direct_alice
+    funded.withdraw_unlocked_stake(1)
+    assert funded.get_passport(1)["status"] == "WITHDRAWN"
+    assert funded.get_fingerprint_owner(FINGERPRINT) == 0
+    passport_id = register(funded, direct_vm, direct_bob)
+    assert passport_id == 2
+    assert funded.get_passport(2)["holder"].lower() == as_hex(direct_bob).lower()
+    assert funded.get_vault_state()["vault_balanced"] is True
+    assert funded.check_vault_invariants()["ok"] is True
+
+
+def test_live_passport_still_blocks_a_stolen_fingerprint(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    verify(funded, direct_vm, 1, anchor=40, binding="partial")
+    direct_vm.sender = direct_bob
+    with direct_vm.expect_revert("duplicate identity fingerprint"):
+        funded.register_credential_claim(HANDLE, "GITHUB", PROOF_URL, FINGERPRINT, 50 * E18)
+
+
+def test_slashed_identity_stays_quarantined(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    verify(funded, direct_vm, 1, page=FABRICATED_PAGE)
+    assert funded.get_passport(1)["status"] == "SLASHED"
+    direct_vm.sender = direct_bob
+    with direct_vm.expect_revert("duplicate identity fingerprint"):
+        funded.register_credential_claim(HANDLE, "GITHUB", PROOF_URL, FINGERPRINT, 50 * E18)
+
+
+def test_slash_retires_confiscated_voucher_records(funded, direct_vm, direct_alice, direct_bob, direct_charlie):
+    register(funded, direct_vm, direct_alice)
+    vouch(funded, direct_vm, direct_bob, 1, 10)
+    challenge(funded, direct_vm, direct_charlie, 1)
+    verify(funded, direct_vm, 1, anchor=0)
+    record = funded.get_passport(1)
+    assert record["status"] == "SLASHED"
+    assert record["voucher_registry"] == ""
+    assert record["vouch_total"] == "0"
+    assert int(record["slashed_vouch_amount"]) == 10 * E18
+    assert int(record["challenger_claimable"]) == 110 * E18
+    direct_vm.sender = direct_bob
+    with direct_vm.expect_revert("vouch stake was slashed"):
+        funded.reclaim_vouch(1)
+    assert funded.check_vault_invariants()["ok"] is True
+    direct_vm.sender = direct_charlie
+    paid = int(funded.claim_verified_stake_or_bounty(1))
+    assert paid == 110 * E18
+    assert int(funded.get_token_balance(as_hex(direct_charlie))) == 560 * E18
+    assert funded.check_vault_invariants()["ok"] is True
+
+
+def test_slash_without_challenger_moves_vouches_to_the_reserve(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    vouch(funded, direct_vm, direct_bob, 1, 10)
+    reserve_before = int(funded.get_vault_state()["protocol_slash_reserve"])
+    verify(funded, direct_vm, 1, anchor=0)
+    record = funded.get_passport(1)
+    assert record["challenge_outcome"] == "AUTO_SLASHED"
+    assert record["voucher_registry"] == ""
+    state = funded.get_vault_state()
+    assert int(state["protocol_slash_reserve"]) == reserve_before + 60 * E18
+    assert int(state["locked_vouches"]) == 0
+    assert funded.check_vault_invariants()["ok"] is True
+
+
+def test_double_reclaim_reverts(funded, direct_vm, direct_alice, direct_bob):
+    register(funded, direct_vm, direct_alice)
+    vouch(funded, direct_vm, direct_bob, 1, 10)
+    direct_vm.sender = direct_bob
+    funded.reclaim_vouch(1)
+    with direct_vm.expect_revert("no active vouch for caller"):
+        funded.reclaim_vouch(1)
+    assert funded.check_vault_invariants()["ok"] is True
