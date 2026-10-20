@@ -1,0 +1,25 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1280
+PlayResY: 720
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,DejaVu Sans,24,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,-1,0,0,0,100,100,0,0,1,2,0,2,60,60,34,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,00:00:00.000,00:00:05.000,Default,,0,0,0,,SybilShield turns a social handle into a staked credential passport.
+Dialogue: 0,00:00:05.000,00:00:08.000,Default,,0,0,0,,The passport is reviewed by validators, not by a backend opinion.
+Dialogue: 0,00:00:08.000,00:00:12.000,Default,,0,0,0,,Free vouches and copied proof pages make reputation trivially farmable.
+Dialogue: 0,00:00:12.000,00:00:16.000,Default,,0,0,0,,Sybil clusters recycle one identity across many wallets.
+Dialogue: 0,00:00:16.000,00:00:20.000,Default,,0,0,0,,Applicants lock real SST. Peers vouch with real stake.
+Dialogue: 0,00:00:20.000,00:00:24.000,Default,,0,0,0,,A challenger locks a bond equal to the stake before verification.
+Dialogue: 0,00:00:24.000,00:00:28.000,Default,,0,0,0,,Validators fetch the proof page and must agree on three fields.
+Dialogue: 0,00:00:28.000,00:00:32.000,Default,,0,0,0,,Anchor 0 slashes. 40 stays provisional. 75 verifies. 100 is Diamond.
+Dialogue: 0,00:00:32.000,00:00:36.000,Default,,0,0,0,,Every liability stays in vault custody until settlement is claimed.
+Dialogue: 0,00:00:36.000,00:00:40.000,Default,,0,0,0,,Rewards are paid only from slashed fraud, never minted per verification.
+Dialogue: 0,00:00:40.000,00:00:44.000,Default,,0,0,0,,Live on studionet: 18 finalized transactions and 3 guard rollbacks.
+Dialogue: 0,00:00:44.000,00:00:48.000,Default,,0,0,0,,Four way sha256 match. github.com/hoveiser/sybil-shield

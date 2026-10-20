@@ -39,7 +39,7 @@ import {
 } from "./lib/genlayer";
 import { sound } from "./lib/sound";
 import type { Dashboard, PassportRecord, PromptPreview } from "./lib/types";
-import { burnerWallet, connectMetaMask, loadBurnerAccount, type WalletState } from "./lib/wallet";
+import { burnerWallet, connectMetaMask, peekBurnerAddress, type WalletState } from "./lib/wallet";
 
 const SPARK_COLORS = ["#22D3EE", "#A78BFA", "#A3E635", "#FBBF24"];
 
@@ -206,7 +206,7 @@ export default function App() {
 
   const burnerAddress = useMemo(() => {
     try {
-      return loadBurnerAccount().address;
+      return peekBurnerAddress();
     } catch {
       return "";
     }

@@ -35,6 +35,16 @@ export function loadBurnerAccount(): GlAccount {
   return createAccount(privateKey as `0x${string}`);
 }
 
+export function peekBurnerAddress(): string {
+  const privateKey = window.localStorage.getItem(BURNER_KEY);
+  if (!privateKey || !privateKey.startsWith("0x") || privateKey.length !== 66) return "";
+  try {
+    return createAccount(privateKey as `0x${string}`).address;
+  } catch {
+    return "";
+  }
+}
+
 export function burnerWallet(): WalletState {
   const account = loadBurnerAccount();
   return { kind: "burner", address: account.address, account };

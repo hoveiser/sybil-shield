@@ -83,6 +83,9 @@ export function GuardLab({ passport, fingerprints, onchain }: GuardLabProps) {
             Each probe runs the exact predicate the contract uses, against the live passport state. The result
             includes the real revert string and a link to the rollback transaction from the studionet run.
           </p>
+          <span className="chip mt-2 border-amber/25 bg-amber/5 text-amber">
+            target passport #{passport.passport_id} @{passport.handle}
+          </span>
         </div>
         <button type="button" onClick={runAll} disabled={Boolean(running)} className="btn-primary !py-2 text-xs">
           <FlaskConical size={14} /> {running === "all" ? "Running..." : "Run all probes"}

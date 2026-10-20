@@ -9,6 +9,7 @@ The output is docs/demo-video-subtitled.mp4 and is intentionally gitignored.
 import math
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -19,6 +20,7 @@ DEMO = ROOT / "artifacts" / "demo"
 FRAMES = DEMO / "frames"
 SOUNDTRACK = DEMO / "soundtrack.wav"
 SUBTITLES = ROOT / "docs" / "demo.srt"
+SUBTITLES_ASS = ROOT / "docs" / "demo.ass"
 OUTPUT = ROOT / "docs" / "demo-video-subtitled.mp4"
 LOGO = ROOT / "docs" / "logo.png"
 
@@ -188,8 +190,8 @@ def draw_scene_1(layer, d, u, t):
     logo, position = scene_title(d, u, t)
     layer.paste(logo, position, logo)
     cx, cy = W // 2, position[1] + 88
-    for index, (radius, color, spread) in enumerate(((126, CYAN, 70), (146, VIOLET, 50), (168, CYAN, 30))):
-        start = (t * (18 + index * 6)) % 360
+    for index, (radius, color, spread) in enumerate(((98, CYAN, 80), (108, VIOLET, 60), (118, CYAN, 40))):
+        start = (t * (14 + index * 5)) % 360
         d.arc([cx - radius, cy - radius, cx + radius, cy + radius], start=start, end=start + spread, fill=color + (150 - index * 35,), width=2)
 
     text(d, (W // 2, 336), "SybilShield", font(BOLD, 78), WHITE, anchor="mm")
@@ -282,8 +284,9 @@ def draw_scene_3(layer, d, u, t):
         text(d, (x + 26, y + 260), metric, font(MONO, 15), color)
         text(d, (x + 334, y + 263), "in vault", font(MONO, 10), MIST, anchor="ra")
         if index < 2:
-            ax = x + 366
-            d.line([(ax, y + 152), (ax + 12, y + 160), (ax, y + 168)], fill=EDGE + (255,), width=2)
+            ax = x + 368
+            ay = y + 154
+            d.line([(ax, ay), (ax + 14, ay + 10), (ax, ay + 20)], fill=MIST + (220,), width=3)
     text(d, (W // 2, 574), "no free vouches  /  no owner override  /  no deterministic badge", font(MONO, 13), MIST, anchor="mm")
 
 
@@ -344,12 +347,11 @@ def draw_scene_5(layer, d, u, t):
             d.rectangle([cursor, y + 1, cursor + segment_width, y + 41], fill=color + (235,))
         cursor += segment_width
     cursor = x
-    for label, value, color in segments:
-        segment_width = (value / total) * width
-        d.ellipse([cursor, y + 58, cursor + 9, y + 67], fill=color)
-        text(d, (cursor + 16, y + 54), label, font(REGULAR, 12), MIST)
-        text(d, (cursor + 16, y + 72), str(value) + " SST", font(MONO, 13), color)
-        cursor += segment_width
+    for index, (label, value, color) in enumerate(segments):
+        lx = 66 + index * 288
+        d.ellipse([lx, y + 58, lx + 9, y + 67], fill=color)
+        text(d, (lx + 16, y + 54), label, font(REGULAR, 12), MIST)
+        text(d, (lx + 16, y + 72), str(value) + " SST", font(MONO, 13), color)
 
     checks = [
         "vault = reserve + locked stakes + vouch escrow + bonds + pending claims",
@@ -378,7 +380,7 @@ def draw_scene_6(layer, d, u, t):
         ("withdraw while challenged", "ERROR", "expected revert", AMBER),
     ]
     visible = int(max(0.0, min(len(rows), (u - 0.05) * 10)))
-    x, y, width = 66, 196, 768
+    x, y, width = 66, 212, 768
     d.rounded_rectangle([x, y - 34, x + width, y + 34 + len(rows) * 42], radius=16, fill=PANEL + (230,), outline=EDGE + (255,), width=1)
     text(d, (x + 20, y - 20), "STEP", font(MONO, 9), MIST)
     text(d, (x + 500, y - 20), "EXECUTION", font(MONO, 9), MIST)
@@ -401,13 +403,73 @@ def draw_scene_6(layer, d, u, t):
         text(d, (892, y + 14), value, font(BOLD, 28), color)
         text(d, (892, y + 50), label, font(REGULAR, 12), MIST)
 
-    text(d, (66, 506), "0x2b7162AdC6F112dC03A746Ead039e44059639A04", font(MONO, 12), WHITE)
-    text(d, (66, 530), "github.com/hoveiser/sybil-shield", font(MONO, 12), CYAN)
-    text(d, (66, 552), "hoveiser.github.io/sybil-shield", font(MONO, 12), CYAN)
-    text(d, (66, 586), "source sha256 e156f1a0f875bd82c39c376dfbc023ce10b8a2501f96b9be82fad5f2b073bbf2", font(MONO, 8), MIST)
+    text(d, (66, 516), "0x2b7162AdC6F112dC03A746Ead039e44059639A04", font(MONO, 12), WHITE)
+    text(d, (66, 540), "github.com/hoveiser/sybil-shield", font(MONO, 12), CYAN)
+    text(d, (66, 562), "hoveiser.github.io/sybil-shield", font(MONO, 12), CYAN)
+    text(d, (66, 592), "source sha256 e156f1a0f875bd82c39c376dfbc023ce10b8a2501f96b9be82fad5f2b073bbf2", font(MONO, 8), MIST)
 
 
 SCENE_DRAWERS = [draw_scene_1, draw_scene_2, draw_scene_3, draw_scene_4, draw_scene_5, draw_scene_6]
+
+SUBTITLE_LINES = [
+    (0.0, 5.0, "SybilShield turns a social handle into a staked credential passport."),
+    (5.0, 8.0, "The passport is reviewed by validators, not by a backend opinion."),
+    (8.0, 12.0, "Free vouches and copied proof pages make reputation trivially farmable."),
+    (12.0, 16.0, "Sybil clusters recycle one identity across many wallets."),
+    (16.0, 20.0, "Applicants lock real SST. Peers vouch with real stake."),
+    (20.0, 24.0, "A challenger locks a bond equal to the stake before verification."),
+    (24.0, 28.0, "Validators fetch the proof page and must agree on three fields."),
+    (28.0, 32.0, "Anchor 0 slashes. 40 stays provisional. 75 verifies. 100 is Diamond."),
+    (32.0, 36.0, "Every liability stays in vault custody until settlement is claimed."),
+    (36.0, 40.0, "Rewards are paid only from slashed fraud, never minted per verification."),
+    (40.0, 44.0, "Live on studionet: 18 finalized transactions and 3 guard rollbacks."),
+    (44.0, 48.0, "Four way sha256 match. github.com/hoveiser/sybil-shield"),
+]
+
+
+def _stamp(seconds: float, comma: bool = True) -> str:
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    rest = seconds % 60
+    whole = int(rest)
+    millis = int(round((rest - whole) * 1000))
+    separator = "," if comma else "."
+    return "%02d:%02d:%02d%s%03d" % (hours, minutes, whole, separator, millis)
+
+
+def write_subtitles():
+    """Write both SRT and ASS, with an explicit 1280x720 script resolution."""
+    srt_blocks = []
+    for index, (start, end, value) in enumerate(SUBTITLE_LINES, start=1):
+        srt_blocks.append(
+            "%d\n%s --> %s\n%s\n" % (index, _stamp(start), _stamp(end), value)
+        )
+    SUBTITLES.write_text("\n".join(srt_blocks) + "\n")
+
+    header = (
+        "[Script Info]\n"
+        "ScriptType: v4.00+\n"
+        "PlayResX: 1280\n"
+        "PlayResY: 720\n"
+        "WrapStyle: 2\n"
+        "ScaledBorderAndShadow: yes\n\n"
+        "[V4+ Styles]\n"
+        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, "
+        "BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, "
+        "BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
+        "Style: Default,DejaVu Sans,24,&H00FFFFFF,&H00FFFFFF,&H00101010,&H80000000,"
+        "-1,0,0,0,100,100,0,0,1,2,0,2,60,60,34,1\n\n"
+        "[Events]\n"
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
+    )
+    events = []
+    for start, end, value in SUBTITLE_LINES:
+        events.append(
+            "Dialogue: 0,%s,%s,Default,,0,0,0,,%s"
+            % (_stamp(start, comma=False), _stamp(end, comma=False), value)
+        )
+    SUBTITLES_ASS.write_text(header + "\n".join(events) + "\n")
+
 
 
 def render_frames():
@@ -457,9 +519,10 @@ def encode():
     if OUTPUT.exists():
         OUTPUT.unlink()
     style = (
-        "FontName=DejaVu Sans,FontSize=21,PrimaryColour=&H00FFFFFF,"
-        "OutlineColour=&H00101010,BorderStyle=1,Outline=2,Shadow=0,MarginV=30,Bold=1"
+        "FontName=DejaVu Sans,FontSize=24,PrimaryColour=&H00FFFFFF,"
+        "OutlineColour=&H00101010,BorderStyle=1,Outline=2,Shadow=0,MarginV=34,Bold=1"
     )
+    write_subtitles()
     command = [
         "ffmpeg",
         "-y",
@@ -473,7 +536,7 @@ def encode():
         "-i",
         str(SOUNDTRACK),
         "-vf",
-        "subtitles=" + str(SUBTITLES) + ":force_style='" + style + "'",
+        "subtitles=" + str(SUBTITLES_ASS) + ":force_style='" + style + "'",
         "-c:v",
         "libx264",
         "-preset",
@@ -498,6 +561,9 @@ def encode():
 
 def main():
     DEMO.mkdir(parents=True, exist_ok=True)
+    if "--encode-only" in sys.argv:
+        encode()
+        return
     if not SOUNDTRACK.exists():
         raise SystemExit("soundtrack missing, run tools/generate_soundtrack.py first")
     render_frames()
