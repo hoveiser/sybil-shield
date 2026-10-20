@@ -1,4 +1,4 @@
-# Identity proof: specter_ops
+# Distributed team operations handbook
 
 This page is a general landing page about operating procedures for distributed
 teams. It covers incident response checklists, release cadence, and on call
