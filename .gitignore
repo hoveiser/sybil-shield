@@ -9,6 +9,8 @@ __pycache__/
 node_modules/
 dist/
 *.mp4
+!docs/demo-video-subtitled.mp4
+!frontend/public/demo-video-subtitled.mp4
 *.webm
 *.wav
 evidence/_checkpoint.json
