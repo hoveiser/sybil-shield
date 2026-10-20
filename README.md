@@ -378,6 +378,11 @@ studionet run, not by direct tests.
 ## Honest notes
 
 - SST is a demo token with a capped faucet. It is not a financial asset.
+- Finalized claims do not expire. `claim_verified_stake_or_bounty` pays only the
+  holder or the challenger named by the settlement, and nothing else can move
+  that balance. The contract deliberately has no on chain clock, so there is no
+  deadline based recovery: a lost key means a lost claim. Pending balances are
+  visible in `check_vault_invariants().breakdown` and on the dashboard.
 - The guard lab is a deterministic mirror of the contract predicates. The real
   rollbacks are recorded in the evidence with their transaction hashes.
 - The simulator never writes to the contract. It mirrors the contract math for
