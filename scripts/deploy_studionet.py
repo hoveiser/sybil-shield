@@ -128,11 +128,12 @@ def summarize(receipt, step, expected, extra=None):
     leader = (receipt.get("consensus_data") or {}).get("leader_receipt")
     leader_entry = leader[0] if leader else {}
     decoded = receipt.get("tx_data_decoded") or {}
+    execution = receipt.get("tx_execution_result_name") or leader_entry.get("execution_result")
     record = {
         "step": step,
         "tx_hash": tx_hash_hex(receipt.get("tx_id")),
         "status": receipt.get("status_name"),
-        "execution_result": receipt.get("tx_execution_result_name"),
+        "execution_result": execution,
         "consensus_result": receipt.get("result_name"),
         "leader_execution": leader_entry.get("execution_result"),
         "expected": expected,
@@ -165,10 +166,11 @@ def send_write(client, address, function_name, args, account, step, expected="SU
 
 
 def observed_matches(record, expected):
+    observed = record.get("leader_execution") or record.get("execution_result")
     if expected == "SUCCESS":
-        return record["execution_result"] == "FINISHED_WITH_RETURN"
+        return observed == "SUCCESS"
     if expected == "ROLLBACK":
-        return record["execution_result"] == "FINISHED_WITH_ERROR"
+        return observed == "ERROR"
     return True
 
 
@@ -251,6 +253,7 @@ def main():
     accounts.update(burners)
 
     transactions = []
+    deploy_source_code = None
     reused = bool(
         checkpoint.get("contract_address")
         and checkpoint.get("source_sha256") == file_sha
@@ -261,6 +264,14 @@ def main():
         contract_address = checkpoint["contract_address"]
         deploy_tx = checkpoint.get("deploy_tx")
         log("reusing deployed contract %s" % contract_address)
+        receipt = with_retries("deploy readback", lambda: client.get_transaction(deploy_tx))
+        deploy_record = summarize(receipt, "deploy", "SUCCESS")
+        transactions.append(deploy_record)
+        decoded = receipt.get("tx_data_decoded") or {}
+        deploy_source_code = decoded.get("code")
+        checkpoint["deploy_execution"] = deploy_record["execution_result"]
+        checkpoint["deploy_consensus"] = deploy_record["consensus_result"]
+        CHECKPOINT.write_text(json.dumps(checkpoint, indent=2) + "\n")
     else:
         log("deploying contract")
         tx = client.deploy_contract(source_bytes.decode("utf-8"), account=deployer)
@@ -283,6 +294,7 @@ def main():
         deploy_record = summarize(receipt, "deploy", "SUCCESS")
         transactions.append(deploy_record)
         deploy_tx = deploy_record["tx_hash"]
+        deploy_source_code = decoded.get("code")
         checkpoint = {
             "contract_address": contract_address,
             "deploy_tx": deploy_tx,
@@ -542,16 +554,7 @@ def main():
         onchain_bytes = bytes(onchain_code)
 
     deploy_record = next((tx for tx in transactions if tx["step"] == "deploy"), None)
-    deploy_code_bytes = None
-    if deploy_record:
-        receipt = with_retries(
-            "deploy code readback",
-            lambda: client.get_transaction(deploy_record["tx_hash"]),
-        )
-        decoded = receipt.get("tx_data_decoded") or {}
-        tx_code = decoded.get("code")
-        if isinstance(tx_code, str):
-            deploy_code_bytes = tx_code.encode("utf-8")
+    deploy_code_bytes = deploy_source_code.encode("utf-8") if isinstance(deploy_source_code, str) else None
     if deploy_code_bytes is None and checkpoint.get("deploy_tx"):
         deploy_record = {
             "step": "deploy",
