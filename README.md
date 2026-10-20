@@ -8,6 +8,7 @@ proof page. There is no owner key, no admin override, and no deterministic
 shortcut that can mint a badge, move escrowed funds, or override reputation.
 
 Live dashboard: <https://hoveiser.github.io/sybil-shield/>
+Demo video: <https://hoveiser.github.io/sybil-shield/demo-video-subtitled.mp4>
 Contract source: [`contracts/sybil_shield.py`](contracts/sybil_shield.py)
 Transaction evidence: [`docs/evidence.md`](docs/evidence.md)
 
@@ -330,12 +331,21 @@ the data as cached.
 
 `docs/demo-video-subtitled.mp4` is a 48 second, 1280x720, H.264/AAC video with a
 synthesized ambient electronic soundtrack and burned-in English subtitles. It is
-gitignored because binaries do not belong on `main`; regenerate it with:
+gitignored on `main` because binaries do not belong in source control, and it is
+published from the `gh-pages` branch next to the dashboard build, so the viewer
+opens at <https://hoveiser.github.io/sybil-shield/demo-video-subtitled.mp4>
+(2,595,776 bytes, served with HTTP 200). The evidence panel on the dashboard
+links to it. Regenerate it with:
 
 ```bash
 .venv/bin/python tools/generate_soundtrack.py
 .venv/bin/python tools/generate_demo_video.py
 ```
+
+The renderer reads `evidence/studionet_deployment.json` for the address, the
+source hash, the transaction count and the guard count, and it refuses to render
+when the four way source identity is incomplete, so the video cannot quote a
+stale claim.
 
 Subtitles are generated in both SRT and ASS form at `docs/demo.srt` and
 `docs/demo.ass`. The ASS file uses an explicit 1280x720 script resolution so the

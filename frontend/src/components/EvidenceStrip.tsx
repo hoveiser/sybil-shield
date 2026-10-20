@@ -97,6 +97,14 @@ export function EvidenceStrip({ snapshot, sourceCheck, verifying, onVerify }: Ev
           >
             Full transaction table and vault audit on GitHub
           </a>
+          <a
+            href={`${import.meta.env.BASE_URL}demo-video-subtitled.mp4`}
+            target="_blank"
+            rel="noreferrer"
+            className="col-span-2 rounded-xl border border-violet/20 bg-violet/5 p-3 text-xs text-violet transition hover:bg-violet/10"
+          >
+            Watch the 48 second demo video with burned-in subtitles
+          </a>
         </div>
       </div>
     </section>
